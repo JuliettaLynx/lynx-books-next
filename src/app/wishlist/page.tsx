@@ -1,13 +1,13 @@
 "use client";
 
-import { BookOpen, Star, Plus } from "lucide-react";
+import { Heart, Star, Plus } from "lucide-react";
 
-export default function LibraryPage() {
+export default function WishlistPage() {
   return (
-    <div className="p-4 lg:p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <p className="text-xl border border-border p-2 rounded-lg font-bold text-black dark:text-white">
-          строка поиска + фильтры + сортировка
+          строка поиска + сортировка
         </p>
         <button className="flex items-center gap-2 px-4 py-2 bg-accent text-bg-primary rounded-lg font-medium hover:bg-accent/80 transition-colors">
           <Plus className="w-5 h-5" />

@@ -4,12 +4,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
-   Цветовая палитра из исходного проекта lynx-books (Vue)
+   Цветовая палитра
    ============================================================ */
 @theme {
   --color-bg-primary: #0e0915;
   --color-bg-secondary: #1d1529;
   --color-border: #3b295a;
+  --color-text: #70617f;
   --color-field: #291d3d;
   --color-accent: #2ae4b2;
 
