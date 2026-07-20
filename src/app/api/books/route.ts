@@ -8,7 +8,7 @@ import { BookSchema } from "@/models/Book";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
@@ -16,7 +16,7 @@ export async function GET() {
     const db = client.db(dbName);
     const books = await db
       .collection("books")
-      .find({ userId: session.user.email })
+      .find({ userId: session.user.id })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -53,7 +53,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     const now = new Date();
     const newBook = {
       ...validated,
-      userId: session.user.email,
+      userId: session.user.id,
       createdAt: now,
       updatedAt: now,
     };
@@ -81,7 +81,10 @@ export async function POST(request: Request) {
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: "Ошибка валидации", message: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Ошибка валидации",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 400 },
     );
   }

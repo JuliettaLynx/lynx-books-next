@@ -12,7 +12,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function GET(
 
     const book = await db.collection("books").findOne({
       _id: new ObjectId(id),
-      userId: session.user.email,
+      userId: session.user.id,
     });
 
     if (!book) {
@@ -66,7 +66,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
@@ -87,11 +87,13 @@ export async function PUT(
       (key) => update[key] === undefined && delete update[key],
     );
 
-    const result = await db.collection("books").findOneAndUpdate(
-      { _id: new ObjectId(id), userId: session.user.email },
-      { $set: update },
-      { returnDocument: "after" },
-    );
+    const result = await db
+      .collection("books")
+      .findOneAndUpdate(
+        { _id: new ObjectId(id), userId: session.user.id },
+        { $set: update },
+        { returnDocument: "after" },
+      );
 
     if (!result) {
       return NextResponse.json({ error: "Книга не найдена" }, { status: 404 });
@@ -119,7 +121,10 @@ export async function PUT(
     return NextResponse.json(updated);
   } catch (error) {
     return NextResponse.json(
-      { error: "Ошибка валидации", message: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Ошибка валидации",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 400 },
     );
   }
@@ -132,7 +137,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
@@ -143,7 +148,7 @@ export async function DELETE(
 
     const result = await db.collection("books").deleteOne({
       _id: new ObjectId(id),
-      userId: session.user.email,
+      userId: session.user.id,
     });
 
     if (result.deletedCount === 0) {

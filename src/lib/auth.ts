@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -15,16 +16,47 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
-        (token as any).id = (user as any).id;
+        token.id = user.id;
+        token.email = user.email;
+        token.avatar = user.avatar || null;
+        token.dailyGoal = user.dailyGoal || 50;
+        token.paletteIndex = user.paletteIndex ?? 0;
       }
+
+      // При обновлении сессии (trigger === "update")
+      if (trigger === "update" && token.email) {
+        try {
+          const client = await clientPromise;
+          const db = client.db(dbName);
+          const usersCollection = db.collection("users");
+          const userFromDb = await usersCollection.findOne({
+            _id: new ObjectId(token.id as string),
+          });
+
+          if (userFromDb) {
+            token.name = userFromDb.name;
+            token.email = userFromDb.email;
+            token.avatar = userFromDb.avatar || null;
+            token.dailyGoal = userFromDb.dailyGoal || 50;
+            token.paletteIndex = userFromDb.paletteIndex ?? 0;
+          }
+        } catch (error) {
+          console.error("Failed to refresh token data:", error);
+        }
+      }
+
       return token;
     },
 
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = (token as any).id as string;
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.avatar = (token.avatar as string) || null;
+        session.user.dailyGoal = (token.dailyGoal as number) || 50;
+        session.user.paletteIndex = (token.paletteIndex as number) ?? 0;
       }
       return session;
     },
@@ -60,7 +92,7 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.passwordHash
+          user.passwordHash,
         );
 
         if (!isPasswordValid) {
@@ -71,6 +103,9 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          avatar: user.avatar || null,
+          dailyGoal: user.dailyGoal || 50,
+          paletteIndex: user.paletteIndex ?? 0,
         };
       },
     }),

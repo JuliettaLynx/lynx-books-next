@@ -6,6 +6,7 @@ export type BookStatus = "не прочитано" | "прочитано" | "б�
 
 export interface Book {
   _id: string;
+  userId: string;
   title: string;
   author: string | null;
   publisher: string | null;
