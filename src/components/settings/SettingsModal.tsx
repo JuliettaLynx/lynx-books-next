@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, ChangeEvent } from "react";
+import { useState, useEffect, useRef, ChangeEvent, Suspense } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -36,7 +36,6 @@ const ProfileSchema = z.object({
     .max(30, "Имя должно содержать максимум 30 символов"),
   email: z.string().trim().toLowerCase().email("Некорректный email-адрес"),
 });
-
 type ProfileInput = z.infer<typeof ProfileSchema>;
 
 const PasswordSchema = z
@@ -51,7 +50,6 @@ const PasswordSchema = z
     message: "Пароли не совпадают",
     path: ["confirmPassword"],
   });
-
 type PasswordInput = z.infer<typeof PasswordSchema>;
 
 const AppSettingsSchema = z.object({
@@ -63,10 +61,12 @@ const AppSettingsSchema = z.object({
     .max(PALETTES.length - 1)
     .optional(),
 });
-
 type AppSettingsInput = z.infer<typeof AppSettingsSchema>;
 
-export function SettingsModal() {
+// ============================================================
+// 1. Внутренний компонент со всей логикой (переименован)
+// ============================================================
+function SettingsModalContent() {
   const { data: session, update: updateSession } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -88,17 +88,13 @@ export function SettingsModal() {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Отслеживаем открытие модалки через URL
   const isOpen = searchParams.get("settings") === "open";
 
   // Закрытие модалки
   const closeModal = () => {
     if (session?.user) {
       const user = session.user as any;
-      profileForm.reset({
-        name: user.name || "",
-        email: user.email || "",
-      });
+      profileForm.reset({ name: user.name || "", email: user.email || "" });
       appForm.reset({
         dailyGoal: user.dailyGoal || 30,
         paletteIndex: user.paletteIndex ?? 0,
@@ -129,9 +125,7 @@ export function SettingsModal() {
     if (!isOpen) return;
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        closeModal();
-      }
+      if (e.key === "Escape") closeModal();
     };
 
     document.addEventListener("keydown", handleEscape);
@@ -170,7 +164,7 @@ export function SettingsModal() {
   const watchDailyGoal = appForm.watch("dailyGoal");
   const watchPaletteIndex = appForm.watch("paletteIndex");
 
-  // Функция сохранения (общая для всех изменений)
+  // Функция сохранения
   const saveAppSettings = async () => {
     const data = appForm.getValues();
     setAppLoading(true);
@@ -226,23 +220,11 @@ export function SettingsModal() {
       const user = session.user as any;
       setAvatarUrl(user.avatar || null);
       setAvatarPreview(user.avatar || null);
-      const newAvatar = user.avatar || null;
-      if (avatarPreview === null) {
-        setAvatarUrl(newAvatar);
-        setAvatarPreview(newAvatar);
-      }
+
       const idx = user.paletteIndex ?? 0;
       setSelectedPaletteIndex(idx);
-
-      profileForm.reset({
-        name: user.name || "",
-        email: user.email || "",
-      });
-
-      appForm.reset({
-        dailyGoal: user.dailyGoal || 30,
-        paletteIndex: idx,
-      });
+      profileForm.reset({ name: user.name || "", email: user.email || "" });
+      appForm.reset({ dailyGoal: user.dailyGoal || 30, paletteIndex: idx });
     }
   }, [session, profileForm, appForm]);
 
@@ -259,20 +241,17 @@ export function SettingsModal() {
       let avatarPath = null;
 
       if (file) {
-        console.log("Starting compression...");
         const options = {
-          maxSizeMB: 0.2, // 200 КБ
-          maxWidthOrHeight: 300, // увеличим до 300
+          maxSizeMB: 0.2,
+          maxWidthOrHeight: 300,
           useWebWorker: true,
           fileType: "image/webp",
         };
         const compressedFile = await imageCompression(file, options);
-        console.log("Compression done, size:", compressedFile.size);
 
         const formData = new FormData();
         formData.append("avatar", compressedFile);
 
-        console.log("Uploading to server...");
         const res = await fetch("/api/settings/avatar", {
           method: "POST",
           body: formData,
@@ -288,7 +267,6 @@ export function SettingsModal() {
             const errorJson = JSON.parse(errorText);
             if (errorJson.error) errorMsg = errorJson.error;
           } catch {
-            // если не JSON, используем текст
             if (errorText) errorMsg = errorText;
           }
           showError(errorMsg);
@@ -296,11 +274,6 @@ export function SettingsModal() {
         }
 
         const result = await res.json();
-        console.log("Server response:", result);
-        if (!res.ok) {
-          showError(result.error || "Ошибка обновления аватара");
-          return false;
-        }
         avatarPath = result.avatar;
       } else {
         // Удаление аватара
@@ -314,10 +287,8 @@ export function SettingsModal() {
 
       await updateSession();
       router.refresh();
-
       setAvatarUrl(avatarPath);
       setAvatarPreview(avatarPath);
-
       showSuccess(file ? "Аватар обновлён" : "Аватар удалён");
       return true;
     } catch (error) {
@@ -359,23 +330,17 @@ export function SettingsModal() {
       const res = await fetch("/api/settings/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-        }),
+        body: JSON.stringify({ name: data.name, email: data.email }),
       });
 
       const result = await res.json();
-
       if (!res.ok) {
         showError(result.error || "Ошибка обновления профиля");
         return;
       }
 
       await updateSession();
-
       router.refresh();
-
       showSuccess("Профиль обновлён");
       profileForm.reset(data);
     } catch {
@@ -399,7 +364,6 @@ export function SettingsModal() {
       });
 
       const result = await res.json();
-
       if (!res.ok) {
         showError(result.error || "Ошибка смены пароля");
         return;
@@ -432,7 +396,6 @@ export function SettingsModal() {
       });
 
       const result = await res.json();
-
       if (!res.ok) {
         showError(result.error || "Ошибка удаления аккаунта");
         return;
@@ -475,10 +438,9 @@ export function SettingsModal() {
   const renderPalette = (index: number) => {
     const colors = PALETTES[index];
     const isSelected = selectedPaletteIndex === index;
-
     const totalColors = Math.min(colors.length, 8);
-    const circleSize = 30; // размер круга в пикселях
-    const step = 20; // шаг между центрами кругов (меньше размера для перекрытия)
+    const circleSize = 30;
+    const step = 20;
     const totalWidth = (totalColors - 1) * step + circleSize;
 
     return (
@@ -542,6 +504,7 @@ export function SettingsModal() {
         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text/50">
           {icon}
         </div>
+
         <input
           {...inputProps}
           className={`w-full pl-10 pr-4 py-2.5 bg-field border ${
@@ -553,33 +516,25 @@ export function SettingsModal() {
     </div>
   );
 
+  // Возвращаем разметку модалки
   return (
     <>
-      {/* Overlay */}
       <div
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
         onClick={closeModal}
       />
-
-      {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-start justify-end">
-        {/* Кнопка закрытия */}
         <button
           onClick={closeModal}
           className="fixed top-4 right-6 z-50 p-2 rounded-lg bg-bg-secondary border border-border hover:bg-border/50 transition-colors"
         >
           <X className="w-5 h-5 text-text" />
         </button>
-
-        {/* Панель настроек */}
         <div className="w-full max-w-lg h-screen bg-bg-primary overflow-y-auto border-l border-border shadow-2xl">
           <div className="p-4 lg:p-6">
-            {/* Заголовок */}
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-6">
               Настройки
             </h1>
-
-            {/* Табы */}
             <div className="mb-6">
               <div className="flex bg-bg-secondary rounded-lg p-1 border border-border">
                 <button
@@ -609,12 +564,9 @@ export function SettingsModal() {
             <div className={`${activeTab === "profile" ? "block" : "hidden"}`}>
               <div className="bg-bg-secondary rounded-xl border border-border p-4 lg:p-6 space-y-6">
                 <div className="flex gap-3 justify-between">
-                  {/* Аватар */}
                   <div className="flex flex-col items-center gap-3 mt-12">
                     <div className="relative group">
                       {renderAvatar()}
-
-                      {/* Кнопка изменения аватара (по центру) */}
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
@@ -627,8 +579,6 @@ export function SettingsModal() {
                           <Camera className="w-6 h-6 text-white" />
                         )}
                       </button>
-
-                      {/* Кнопка удаления аватара (крестик в правом верхнем углу) */}
                       {avatarUrl && (
                         <button
                           type="button"
@@ -649,7 +599,6 @@ export function SettingsModal() {
                     />
                   </div>
 
-                  {/* Имя и Email */}
                   <form
                     onSubmit={profileForm.handleSubmit(handleProfileSubmit)}
                     className="space-y-4"
@@ -657,7 +606,6 @@ export function SettingsModal() {
                     <h2 className="text-lg font-semibold text-white">
                       Личные данные
                     </h2>
-
                     {renderField(
                       "",
                       <User className="w-5 h-5" />,
@@ -668,7 +616,6 @@ export function SettingsModal() {
                       },
                       profileForm.formState.errors.name?.message,
                     )}
-
                     {renderField(
                       "",
                       <Mail className="w-5 h-5" />,
@@ -679,7 +626,6 @@ export function SettingsModal() {
                       },
                       profileForm.formState.errors.email?.message,
                     )}
-
                     <button
                       type="submit"
                       disabled={!isProfileDirty || loading}
@@ -702,14 +648,11 @@ export function SettingsModal() {
 
                 <div className="border-t border-border" />
 
-                {/* Смена пароля */}
                 <form
                   onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
                   className="space-y-4"
                 >
                   <h2 className="text-lg font-semibold text-white">Пароль</h2>
-
-                  {/* Текущий пароль */}
                   <div className="space-y-1.5">
                     <label className="block text-sm font-medium text-text">
                       Текущий пароль
@@ -743,7 +686,6 @@ export function SettingsModal() {
                     )}
                   </div>
 
-                  {/* Новый пароль */}
                   <div className="space-y-1.5">
                     <label className="block text-sm font-medium text-text">
                       Новый пароль
@@ -775,7 +717,6 @@ export function SettingsModal() {
                     )}
                   </div>
 
-                  {/* Подтверждение пароля */}
                   <div className="space-y-1.5">
                     <label className="block text-sm font-medium text-text">
                       Подтвердите пароль
@@ -827,9 +768,7 @@ export function SettingsModal() {
 
                 <div className="border-t border-border" />
 
-                {/* Кнопки действий */}
                 <div className="space-y-3">
-                  {/* Выход */}
                   <button
                     onClick={handleLogout}
                     className="w-full py-2.5 bg-field hover:bg-field/80 text-text border border-border rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -838,7 +777,6 @@ export function SettingsModal() {
                     Выйти из аккаунта
                   </button>
 
-                  {/* Удаление аккаунта */}
                   <div className="space-y-2">
                     {!deleteConfirm ? (
                       <button
@@ -884,11 +822,9 @@ export function SettingsModal() {
               </div>
             </div>
 
-            {/* === Секция: Приложение === */}
+            {/* Секция Приложение */}
             <div
-              className={`${
-                activeTab === "app" ? "block" : "hidden"
-              } mt-4 lg:mt-6`}
+              className={`${activeTab === "app" ? "block" : "hidden"} mt-4 lg:mt-6`}
             >
               <div className="bg-bg-secondary rounded-xl border border-border p-4 lg:p-6 space-y-6">
                 <h2 className="text-lg font-semibold text-white">
@@ -922,7 +858,7 @@ export function SettingsModal() {
                     />
 
                     {appForm.formState.errors.dailyGoal && (
-                      <p className="text-red-400 text-xs"> Введите число</p>
+                      <p className="text-red-400 text-xs">Введите число</p>
                     )}
                     <p className="text-xs text-text/50">
                       Установите ежедневную цель по страницам для мотивации
@@ -952,5 +888,16 @@ export function SettingsModal() {
         </div>
       </div>
     </>
+  );
+}
+
+// ============================================================
+// 2. Экспортируемый компонент-обёртка с Suspense
+// ============================================================
+export function SettingsModal() {
+  return (
+    <Suspense fallback={null}>
+      <SettingsModalContent />
+    </Suspense>
   );
 }
