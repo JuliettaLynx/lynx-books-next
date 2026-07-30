@@ -31,7 +31,7 @@ export default function AuthPage() {
   // ── Форма регистрации ──
   const registerForm = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: { name: "", email: "", password: "" },
     mode: "onChange",
   });
 
@@ -325,31 +325,6 @@ export default function AuthPage() {
                 {registerForm.formState.errors.password && (
                   <p className={errorClass}>
                     {registerForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Подтверждение пароля */}
-              <div className="space-y-1">
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    {...registerForm.register("confirmPassword")}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="* * * * * *"
-                    className={`${inputClass} pl-10 pr-14`}
-                    onKeyDown={handleEnter}
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {renderCheckIcon(
-                      registerForm.formState.dirtyFields.confirmPassword,
-                      registerForm.formState.errors.confirmPassword,
-                    )}
-                  </div>
-                </div>
-                {registerForm.formState.errors.confirmPassword && (
-                  <p className={errorClass}>
-                    {registerForm.formState.errors.confirmPassword.message}
                   </p>
                 )}
               </div>

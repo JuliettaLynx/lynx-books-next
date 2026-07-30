@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import clientPromise, { dbName } from "@/lib/db";
-import { RegisterServerSchema } from "@/models/User"; // Импорт схемы
+import { RegisterSchema } from "@/models/User";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validated = RegisterServerSchema.parse(body);
+    const validated = RegisterSchema.parse(body);
 
     const client = await clientPromise;
     const db = client.db(dbName);
