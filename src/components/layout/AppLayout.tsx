@@ -6,13 +6,6 @@ import { TabBar } from "@/components/navigation/TabBar";
 import { Header } from "@/components/navigation/Header";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAuthPage = pathname === "/auth";
-
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
       <Sidebar />
