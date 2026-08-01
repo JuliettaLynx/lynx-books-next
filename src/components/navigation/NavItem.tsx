@@ -44,17 +44,29 @@ function NavItem({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={handleClick}
-          disabled={isPending}
-          className={linkClasses}
-          aria-label={label}
-          {...(external && { target: "_blank", rel: "noopener noreferrer" })}
-        >
-          <Icon className="w-7 h-7" />
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={(triggerProps) => {
+          const { onClick: triggerClick, ...restTriggerProps } = triggerProps;
+          return (
+            <button
+              onClick={(e) => {
+                triggerClick?.(e);
+                handleClick();
+              }}
+              disabled={isPending}
+              className={linkClasses}
+              aria-label={label}
+              {...(external && {
+                target: "_blank",
+                rel: "noopener noreferrer",
+              })}
+              {...restTriggerProps}
+            >
+              <Icon className="w-7 h-7" />
+            </button>
+          );
+        }}
+      />
       <TooltipContent side="right">
         <p>{label}</p>
       </TooltipContent>
