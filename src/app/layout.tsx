@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 const fontSans = Geist({
   variable: "--font-sans",
   subsets: ["latin", "cyrillic"],
+  display: "optional",
 });
 
 export const metadata: Metadata = {
