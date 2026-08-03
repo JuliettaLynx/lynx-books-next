@@ -13,7 +13,8 @@ export default async function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
+    pathname === "/favicon.ico" ||
+    pathname === "/site.webmanifest"
   ) {
     return NextResponse.next();
   }

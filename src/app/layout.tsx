@@ -14,6 +14,11 @@ const fontSans = Geist({
 export const metadata: Metadata = {
   title: "LynxBooks",
   description: "Отслеживайте свои книги, сессии чтения и делитесь с друзьями",
+  icons: {
+    icon: "/android-512x512.png",
+    apple: "/android-192x192.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
