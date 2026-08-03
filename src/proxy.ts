@@ -10,9 +10,7 @@ export default async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Разрешаем доступ к страницам авторизации и API без токена
   if (
-    pathname.startsWith("/auth") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon")
@@ -20,7 +18,12 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!token) {
+  if (token && pathname.startsWith("/auth")) {
+    const libraryUrl = new URL("/library", request.url);
+    return NextResponse.redirect(libraryUrl);
+  }
+
+  if (!token && !pathname.startsWith("/auth")) {
     const loginUrl = new URL("/auth/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
