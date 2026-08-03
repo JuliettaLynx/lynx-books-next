@@ -12,7 +12,7 @@ const fontSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "LynxBooks — Трекер чтения",
+  title: "LynxBooks",
   description: "Отслеживайте свои книги, сессии чтения и делитесь с друзьями",
 };
 

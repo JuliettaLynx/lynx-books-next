@@ -22,8 +22,14 @@ export function AuthLayout({
   error,
 }: AuthLayoutProps) {
   return (
-    <div className="fixed min-h-screen min-w-full bg-background flex items-center justify-center p-4">
-      <div className="bg-secondary rounded-2xl p-6 w-full max-w-sm -bg-linear-20 from-background/50 via-secondary/30 to-accent/70">
+    <div className="fixed inset-0 bg-background flex items-center justify-center p-4 overflow-hidden">
+      <div className="absolute inset-0 z-0 auth-background">
+        <div className="aurora aurora-1" />
+        <div className="aurora aurora-2" />
+        <div className="stars" />
+      </div>
+
+      <div className="relative z-10 rounded-2xl p-6 w-full max-w-sm bg-secondary/50 -bg-linear-20 from-background/50 via-secondary/30 to-primary/20">
         <h1 className="text-foreground text-2xl tracking-wider font-bold text-center pb-4">
           {title}
         </h1>
