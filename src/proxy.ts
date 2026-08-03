@@ -20,9 +20,8 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Если нет токена — редирект на страницу входа
   if (!token) {
-    const loginUrl = new URL("/auth", request.url);
+    const loginUrl = new URL("/auth/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 

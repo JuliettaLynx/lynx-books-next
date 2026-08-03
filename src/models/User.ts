@@ -19,10 +19,19 @@ export const RegisterSchema = z.object({
   name: z
     .string()
     .trim()
+    .nonempty("Поле обязательно")
     .min(3, "Имя должно содержать минимум 3 символа")
-    .max(30, "Имя должно содержать максимум 30 символов"),
-  email: z.string().trim().toLowerCase().email("Некорректный email-адрес"),
-  password: z.string().min(6, "Пароль должен содержать минимум 6 символов"),
+    .regex(/[a-zA-Zа-яА-ЯёЁ]/, "Имя должно содержать хотя бы одну букву"),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .nonempty("Поле обязательно")
+    .email("Некорректный email-адрес"),
+  password: z
+    .string()
+    .nonempty("Поле обязательно")
+    .min(6, "Пароль должен быть не менее 6 символов"),
 });
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;

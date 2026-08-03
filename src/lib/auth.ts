@@ -10,8 +10,8 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-    signIn: "/auth",
-    error: "/auth",
+    signIn: "/auth/login",
+    error: "/auth/login",
   },
 
   callbacks: {
@@ -60,7 +60,7 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.passwordHash
+          user.passwordHash,
         );
 
         if (!isPasswordValid) {
