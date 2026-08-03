@@ -16,29 +16,28 @@ const createIcon = (Icon: any, colorClass: string) => {
 
 export const showSuccess = (message: string, description?: string) => {
   toast.success(message, {
-    icon: createIcon(CircleCheckBig, "text-green-500"),
+    icon: createIcon(CircleCheckBig, "text-success"),
     duration: 1000,
   });
 };
 
 export const showError = (message: string, description?: string) => {
   toast.error(message, {
-    icon: createIcon(CircleX, "text-red-500"),
+    icon: createIcon(CircleX, "text-destructive"),
     duration: 5000,
   });
 };
 
-// === Пока не используется ===
 export const showWarning = (message: string, description?: string) => {
   toast.warning(message, {
-    icon: createIcon(AlertCircle, "text-yellow-500"),
+    icon: createIcon(AlertCircle, "text-warning"),
     duration: 4000,
   });
 };
 
 export const showInfo = (message: string, description?: string) => {
   toast.info(message, {
-    icon: createIcon(Info, "text-blue-500"),
+    icon: createIcon(Info, "text-foreground"),
     duration: 3000,
   });
 };

@@ -13,6 +13,7 @@ import AuthFormField from "@/components/shared/AuthFormField";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { useFormTouched } from "@/hooks/useFormTouched";
 import { useFormNavigation } from "@/hooks/useFormNavigation";
+import { showSuccess, showError } from "@/lib/toast";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -47,9 +48,13 @@ export default function RegisterPage() {
           password: data.password,
         }),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Ошибка регистрации");
+        const msg = errorData.error || "Ошибка регистрации";
+        showError(msg);
+        setError(msg);
+        return;
       }
 
       const result = await signIn("credentials", {
@@ -57,14 +62,18 @@ export default function RegisterPage() {
         password: data.password,
         redirect: false,
       });
+
       if (result?.error) {
+        showError(result.error);
         setError(result.error);
       } else {
+        showSuccess("Регистрация успешна", "Вы автоматически вошли в аккаунт");
         router.push("/library");
         router.refresh();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Ошибка регистрации";
+      showError(msg);
       setError(msg);
     } finally {
       setLoading(false);

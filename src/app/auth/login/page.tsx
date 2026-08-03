@@ -13,6 +13,7 @@ import AuthFormField from "@/components/shared/AuthFormField";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { useFormTouched } from "@/hooks/useFormTouched";
 import { useFormNavigation } from "@/hooks/useFormNavigation";
+import { showSuccess, showError } from "@/lib/toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,12 +44,15 @@ export default function LoginPage() {
         redirect: false,
       });
       if (result?.error) {
+        showError(result.error);
         setError(result.error);
       } else {
+        showSuccess("Выполняется вход...");
         router.push("/library");
         router.refresh();
       }
     } catch {
+      showError("Произошла неизвестная ошибка");
       setError("Произошла ошибка при входе");
     } finally {
       setLoading(false);
