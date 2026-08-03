@@ -38,8 +38,16 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 
 // === Схема входа ===
 export const LoginSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Некорректный email-адрес"),
-  password: z.string().min(1, "Введите пароль"),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .nonempty("Поле обязательно")
+    .email("Некорректный email-адрес"),
+  password: z
+    .string()
+    .nonempty("Поле обязательно")
+    .min(6, "Пароль должен быть не менее 6 символов"),
 });
 
 export type LoginInput = z.infer<typeof LoginSchema>;
