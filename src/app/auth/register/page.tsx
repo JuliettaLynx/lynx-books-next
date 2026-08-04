@@ -9,7 +9,7 @@ import { RegisterSchema, RegisterInput } from "@/models/User";
 import { Mail, Lock, User } from "lucide-react";
 
 import { FieldGroup } from "@/components/ui/field";
-import AuthFormField from "@/components/shared/AuthFormField";
+import AuthFormField from "@/components/features/auth/AuthFormField";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { useFormTouched } from "@/hooks/useFormTouched";
 import { useFormNavigation } from "@/hooks/useFormNavigation";
