@@ -1,9 +1,9 @@
 import { ReactNode, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import "../features/auth/authBgStyle.css";
-import StarsBackground from "../features/auth/StarsBackground";
 import ShootingStars from "../features/auth/ShootingStars";
+import AuraBackground from "../shared/AuraBackground";
+import StarsBackground from "../shared/StarsBackground";
 
 interface AuthLayoutProps {
   title: string;
@@ -26,10 +26,7 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center p-4 overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-background">
-        <div className="aurora" />
-      </div>
-
+      <AuraBackground />
       <StarsBackground />
       <ShootingStars interval={1500} />
 

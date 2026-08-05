@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useCallback } from "react";
-import "./authBgStyle.css";
 
 interface ShootingStarsProps {
   interval?: number;
@@ -15,7 +14,8 @@ const ShootingStars: React.FC<ShootingStarsProps> = ({ interval = 2000 }) => {
     if (!containerRef.current) return;
 
     const star = document.createElement("div");
-    star.className = "falling-star";
+    star.className =
+      "absolute w-[7px] h-[7px] bg-white rounded-full pointer-events-none top-[-10vh]";
 
     const x = 30 + Math.random() * 140;
     star.style.left = x + "vw";
@@ -60,7 +60,12 @@ const ShootingStars: React.FC<ShootingStarsProps> = ({ interval = 2000 }) => {
     };
   }, [createFallingStar, interval]);
 
-  return <div ref={containerRef} className="shooting-stars-container" />;
+  return (
+    <div
+      ref={containerRef}
+      className="fixed top-0 left-0 w-screen h-screen pointer-events-none z-10 overflow-hidden"
+    />
+  );
 };
 
 export default ShootingStars;
