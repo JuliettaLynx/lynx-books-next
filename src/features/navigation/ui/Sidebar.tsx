@@ -2,31 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import NavItem from "./NavItem";
-import {
-  Library,
-  ChartBarDecreasing,
-  Heart,
-  Users,
-  MessageSquareMore,
-  User,
-} from "lucide-react";
-
-const mainNavItems = [
-  { href: "/library", label: "Библиотека", icon: Library },
-  { href: "/tracker", label: "Трекер", icon: ChartBarDecreasing },
-  { href: "/wishlist", label: "Вишлист", icon: Heart },
-  { href: "/community", label: "Подписки", icon: Users },
-];
-
-const bottomItems = [
-  {
-    href: "https://forms.gle/Ff2xgHXGYgEjbT858",
-    label: "Связаться",
-    icon: MessageSquareMore,
-    external: true,
-  },
-  { href: "/profile", label: "Профиль", icon: User, external: false },
-];
+import { mainNavItems, bottomNavItems } from "../model/navConfig";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -57,14 +33,13 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 space-y-2">
-        {bottomItems.map((item) => (
+        {bottomNavItems.map((item) => (
           <NavItem
             key={item.href}
             href={item.href}
             icon={item.icon}
             label={item.label}
             isActive={pathname === item.href}
-            external={item.external}
           />
         ))}
       </div>

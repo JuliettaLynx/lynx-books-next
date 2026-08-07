@@ -13,22 +13,16 @@ function NavItem({
   icon: Icon,
   label,
   isActive = false,
-  external = false,
 }: {
   href: string;
   icon: React.ElementType;
   label: string;
   isActive?: boolean;
-  external?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleClick = () => {
-    if (external) {
-      window.open(href, "_blank", "noopener,noreferrer");
-      return;
-    }
     startTransition(() => {
       router.push(href);
     });
@@ -55,10 +49,6 @@ function NavItem({
               disabled={isPending}
               className={linkClasses}
               aria-label={label}
-              {...(external && {
-                target: "_blank",
-                rel: "noopener noreferrer",
-              })}
               {...restTriggerProps}
             >
               <Icon className="w-7 h-7" />

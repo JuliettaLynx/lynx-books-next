@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LibraryBig, ChartColumn, Heart, Users, User } from "lucide-react";
 import { useRef, useEffect, useState, useCallback } from "react";
-
-const navItems = [
-  { href: "/library", icon: LibraryBig },
-  { href: "/tracker", icon: ChartColumn },
-  { href: "/wishlist", icon: Heart },
-  { href: "/community", icon: Users },
-  { href: "/profile", icon: User },
-];
+import { tabNavItems } from "../model/navConfig";
 
 export function TabBar() {
   const pathname = usePathname();
@@ -20,6 +12,13 @@ export function TabBar() {
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
   const [isMounted, setIsMounted] = useState(false);
+
+  const activeItem = tabNavItems.find((item) =>
+    item.activePaths
+      ? item.activePaths.includes(pathname)
+      : pathname === item.href,
+  );
+  const activeHref = activeItem?.href || pathname;
 
   const moveEars = useCallback((targetHref: string) => {
     const nav = navRef.current;
@@ -44,9 +43,9 @@ export function TabBar() {
   useEffect(() => {
     if (!isMounted) return;
     requestAnimationFrame(() => {
-      moveEars(pathname);
+      moveEars(activeHref);
     });
-  }, [pathname, isMounted, moveEars]);
+  }, [activeHref, isMounted, moveEars]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -54,7 +53,7 @@ export function TabBar() {
     const handleResize = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        moveEars(pathname);
+        moveEars(activeHref);
       }, 150);
     };
     window.addEventListener("resize", handleResize);
@@ -62,15 +61,17 @@ export function TabBar() {
       window.removeEventListener("resize", handleResize);
       clearTimeout(timer);
     };
-  }, [pathname, isMounted, moveEars]);
+  }, [activeHref, isMounted, moveEars]);
 
   return (
     <nav
       ref={navRef}
       className="fixed bottom-0 left-0 w-full bg-secondary border-t border-border rounded-t-4xl flex justify-around items-center h-16 z-30 lg:hidden bg-linear-to-t from-background/40 to-secondary"
     >
-      {navItems.map((item) => {
-        const isActive = pathname === item.href;
+      {tabNavItems.map((item) => {
+        const isActive = item.activePaths
+          ? item.activePaths.includes(pathname)
+          : pathname === item.href;
         return (
           <Link
             key={item.href}

@@ -1,7 +1,7 @@
 "use client";
 
-import { Sidebar } from "@/features/navigation/Sidebar";
-import { TabBar } from "@/features/navigation/TabBar";
+import { Sidebar } from "@/features/navigation/ui/Sidebar";
+import { TabBar } from "@/features/navigation/ui/TabBar";
 import AuraBackground from "../../components/background/AuraBackground";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
