@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/components/providers/AuthProvider";
+import { AuthProvider } from "@/shared/providers/AuthProvider";
 import { Toaster } from "sonner";
 
 const fontSans = Geist({

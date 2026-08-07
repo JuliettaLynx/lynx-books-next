@@ -1,9 +1,9 @@
 import { ReactNode, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import ShootingStars from "../features/auth/ShootingStars";
-import AuraBackground from "../shared/AuraBackground";
-import StarsBackground from "../shared/StarsBackground";
+import ShootingStars from "../../components/background/ShootingStars";
+import AuraBackground from "../../components/background/AuraBackground";
+import StarsBackground from "../../components/background/StarsBackground";
 
 interface AuthLayoutProps {
   title: string;

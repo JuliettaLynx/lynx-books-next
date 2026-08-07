@@ -5,15 +5,15 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RegisterSchema, RegisterInput } from "@/models/User";
+import { RegisterSchema, RegisterInput } from "@/shared/models/User";
 import { Mail, Lock, User } from "lucide-react";
 
 import { FieldGroup } from "@/components/ui/field";
-import AuthFormField from "@/components/features/auth/AuthFormField";
-import AuthLayout from "@/components/layout/AuthLayout";
+import AuthFormField from "@/features/auth/AuthFormField";
+import AuthLayout from "@/shared/layout/AuthLayout";
 import { useFormTouched } from "@/hooks/useFormTouched";
 import { useFormNavigation } from "@/hooks/useFormNavigation";
-import { showSuccess, showError } from "@/lib/toast";
+import { showSuccess, showError } from "@/shared/lib/toast";
 
 export default function RegisterPage() {
   const router = useRouter();

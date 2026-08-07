@@ -38,7 +38,7 @@ function NavItem({
     flex items-center gap-3 p-2 rounded-lg
     transition-colors
     transform transition-transform duration-100 cursor-pointer 
-    ${isActive ? "text-primary" : isPending ? "scale-90 text-secondary-foreground" : "text-muted-foreground hover:text-secondary-foreground"}
+    ${isActive ? "text-primary" : isPending ? "translate-y-px text-secondary-foreground" : "text-muted-foreground hover:text-secondary-foreground"}
   `;
 
   return (

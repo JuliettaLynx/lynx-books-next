@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import clientPromise, { dbName } from "@/lib/db";
+import { authOptions } from "@/shared/lib/auth";
+import clientPromise, { dbName } from "@/shared/lib/db";
 import { ObjectId } from "mongodb";
 
 /**
@@ -44,7 +44,7 @@ export async function getCurrentUser() {
   const users = await getUsersCollection();
   const user = await users.findOne(
     { email: session.user.email },
-    { projection: { passwordHash: 0 } }
+    { projection: { passwordHash: 0 } },
   );
 
   if (!user) {

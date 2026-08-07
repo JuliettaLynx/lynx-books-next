@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import clientPromise, { dbName } from "@/lib/db";
+import clientPromise, { dbName } from "@/shared/lib/db";
 
 export const authOptions: NextAuthOptions = {
   session: {

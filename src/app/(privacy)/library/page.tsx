@@ -1,10 +1,8 @@
 "use client";
 
-import { BookOpen, Star, Plus } from "lucide-react";
 import { Wrench } from "lucide-react";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,

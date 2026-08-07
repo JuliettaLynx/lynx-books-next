@@ -7,13 +7,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock } from "lucide-react";
 
-import { LoginSchema, LoginInput } from "@/models/User";
+import { LoginSchema, LoginInput } from "@/shared/models/User";
 import { FieldGroup } from "@/components/ui/field";
-import AuthFormField from "@/components/features/auth/AuthFormField";
-import AuthLayout from "@/components/layout/AuthLayout";
+import AuthFormField from "@/features/auth/AuthFormField";
+import AuthLayout from "@/shared/layout/AuthLayout";
 import { useFormTouched } from "@/hooks/useFormTouched";
 import { useFormNavigation } from "@/hooks/useFormNavigation";
-import { showSuccess, showError } from "@/lib/toast";
+import { showSuccess, showError } from "@/shared/lib/toast";
 
 export default function LoginPage() {
   const router = useRouter();

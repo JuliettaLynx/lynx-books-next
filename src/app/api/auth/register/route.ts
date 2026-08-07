@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import clientPromise, { dbName } from "@/lib/db";
-import { RegisterSchema } from "@/models/User";
+import clientPromise, { dbName } from "@/shared/lib/db";
+import { RegisterSchema } from "@/shared/models/User";
 
 export async function POST(request: NextRequest) {
   try {
