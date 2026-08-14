@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { tabNavItems } from "../model/navConfig";
+import { Star } from "lucide-react";
 
 export function TabBar() {
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
-  const earsRef = useRef<HTMLDivElement>(null);
+  const starRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
   const [isMounted, setIsMounted] = useState(false);
@@ -20,20 +21,20 @@ export function TabBar() {
   );
   const activeHref = activeItem?.href || pathname;
 
-  const moveEars = useCallback((targetHref: string) => {
+  const moveStar = useCallback((targetHref: string) => {
     const nav = navRef.current;
-    const ears = earsRef.current;
+    const star = starRef.current;
     const targetLink = linkRefs.current[targetHref];
-    if (!nav || !ears || !targetLink) return;
+    if (!nav || !star || !targetLink) return;
 
     const navRect = nav.getBoundingClientRect();
     const linkRect = targetLink.getBoundingClientRect();
-    const earsWidth = ears.offsetWidth;
+    const starWidth = star.offsetWidth;
 
     const offsetX =
-      linkRect.left - navRect.left + linkRect.width / 2 - earsWidth / 2;
+      linkRect.left - navRect.left + linkRect.width / 2 - starWidth / 2;
 
-    ears.style.transform = `translateX(${offsetX}px)`;
+    star.style.transform = `translateX(${offsetX}px)`;
   }, []);
 
   useEffect(() => {
@@ -43,9 +44,9 @@ export function TabBar() {
   useEffect(() => {
     if (!isMounted) return;
     requestAnimationFrame(() => {
-      moveEars(activeHref);
+      moveStar(activeHref);
     });
-  }, [activeHref, isMounted, moveEars]);
+  }, [activeHref, isMounted, moveStar]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -53,7 +54,7 @@ export function TabBar() {
     const handleResize = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        moveEars(activeHref);
+        moveStar(activeHref);
       }, 150);
     };
     window.addEventListener("resize", handleResize);
@@ -61,12 +62,12 @@ export function TabBar() {
       window.removeEventListener("resize", handleResize);
       clearTimeout(timer);
     };
-  }, [activeHref, isMounted, moveEars]);
+  }, [activeHref, isMounted, moveStar]);
 
   return (
     <nav
       ref={navRef}
-      className="fixed bottom-0 left-0 w-full bg-secondary border-t border-border rounded-t-4xl flex justify-around items-center h-16 z-30 lg:hidden bg-linear-to-t from-background/40 to-secondary"
+      className="fixed bottom-2 inset-x-2 bg-secondary border-t border-border rounded-full flex justify-around items-center h-14 z-30 lg:hidden bg-linear-to-tr from-background/40 to-accent"
     >
       {tabNavItems.map((item) => {
         const isActive = item.activePaths
@@ -81,24 +82,20 @@ export function TabBar() {
             }}
             className={`flex flex-col items-center justify-center p-2 transition-colors relative z-10 ${
               isActive
-                ? "text-primary"
+                ? "text-secondary"
                 : "text-secondary-foreground hover:text-foreground"
             }`}
           >
-            <item.icon className="w-5 h-5" />
+            <item.icon className="w-5 h-5 stroke-[2.5]" />
           </Link>
         );
       })}
 
       <div
-        ref={earsRef}
-        className="absolute top-2 left-0 flex items-center justify-center pointer-events-none -z-10 transition-transform duration-300 ease"
+        ref={starRef}
+        className="absolute top-1 left-0 flex items-center justify-center pointer-events-none -z-10 transition-transform duration-300 ease"
       >
-        <img
-          src="/ears.svg"
-          alt="ears"
-          className="w-8 h-8 shadow-2xl shadow-primary"
-        />
+        <Star className="w-11 h-11 text-primary fill-primary" />
       </div>
     </nav>
   );

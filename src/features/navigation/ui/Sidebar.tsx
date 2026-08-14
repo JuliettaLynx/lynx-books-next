@@ -1,8 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import NavItem from "./NavItem";
-import { mainNavItems, bottomNavItems } from "../model/navConfig";
+import Link from "next/link";
+import NavItem from "@/features/navigation/ui/NavItem";
+import {
+  mainNavItems,
+  bottomNavItems,
+} from "@/features/navigation/model/navConfig";
+import Logo from "@/assets/logo.svg";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -10,15 +15,15 @@ export function Sidebar() {
   return (
     <aside
       className={`
-        fixed inset-y-0 left-0 z-50 w-16
-        bg-secondary bg-linear-to-tr from-background/60 to-secondary
-        shadow-2xl border-r border-border
+        fixed inset-y-2 left-2 z-50 w-14
+        bg-secondary bg-linear-to-tr from-background/60 to-accent
+        rounded-full shadow-2xl border-r border-border
         hidden lg:flex lg:flex-col items-center py-1 gap-1 
       `}
     >
-      <div className="p-1.5 flex items-center gap-3">
-        <img src="/logo.svg" alt="LynxBooks" className="w-14" />
-      </div>
+      <Link href="/library" className="p-1.5 pt-3 flex items-center gap-3">
+        <Logo className="text-primary w-12 h-12" />
+      </Link>
 
       <nav className="flex-1 flex flex-col justify-center items-center p-2.5 space-y-2 ">
         {mainNavItems.map((item) => (

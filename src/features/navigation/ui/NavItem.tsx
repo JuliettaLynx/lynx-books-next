@@ -51,7 +51,7 @@ function NavItem({
               aria-label={label}
               {...restTriggerProps}
             >
-              <Icon className="w-7 h-7" />
+              <Icon className="w-6 h-6 stroke-[2.5]" />
             </button>
           );
         }}
