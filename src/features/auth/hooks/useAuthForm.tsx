@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
 import { Mail, Lock, User } from "lucide-react";
 
 import {
@@ -11,8 +12,8 @@ import {
   LoginInput,
   RegisterInput,
 } from "@/shared/models/User";
-import { useFormTouched } from "./useFormTouched";
-import { useFormNavigation } from "@/hooks/useFormNavigation"; // ✅ исправленный путь
+import { useFormTouched } from "@/features/auth/hooks/useFormTouched";
+import { useFormNavigation } from "@/hooks/useFormNavigation";
 import { showSuccess, showError } from "@/shared/lib/toast";
 import { FieldConfig } from "@/features/auth/model/auth-form";
 
@@ -171,24 +172,16 @@ export function useAuthForm(mode: Mode) {
   const toggleLink = isLogin ? (
     <>
       Нет аккаунта?{" "}
-      <button
-        type="button"
-        onClick={toggleMode}
-        className="text-primary hover:underline font-medium ml-1"
-      >
+      <Button variant="link" onClick={toggleMode} className="h-4">
         Создать
-      </button>
+      </Button>
     </>
   ) : (
     <>
       Уже есть аккаунт?{" "}
-      <button
-        type="button"
-        onClick={toggleMode}
-        className="text-primary hover:underline font-medium ml-1"
-      >
+      <Button variant="link" onClick={toggleMode} className="h-4">
         Войти
-      </button>
+      </Button>
     </>
   );
 

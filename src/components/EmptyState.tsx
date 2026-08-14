@@ -8,6 +8,7 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 interface EmptyStateProps {
@@ -40,13 +41,9 @@ export function EmptyState({
         {description && <EmptyDescription>{description}</EmptyDescription>}
         {buttonText && onButtonClick && (
           <EmptyContent>
-            <button
-              type="button"
-              onClick={onButtonClick}
-              className="text-xs text-primary hover:underline"
-            >
+            <Button variant="link" onClick={onButtonClick} className="text-sm">
               {buttonText}
-            </button>
+            </Button>
           </EmptyContent>
         )}
       </EmptyHeader>

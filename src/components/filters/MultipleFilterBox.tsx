@@ -13,6 +13,7 @@ import {
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 
 import { FilterOption } from "@/shared/types/filter";
+import { Button } from "@/components/ui/button";
 
 interface MultipleFilterBoxProps {
   options: FilterOption[];
@@ -113,13 +114,14 @@ export function MultipleFilterBox({
               {selected.length} выбрано
             </span>
             {selected.length > 0 && (
-              <button
-                type="button"
-                className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              <Button
+                variant="link"
                 onClick={handleClearAll}
+                size="xs"
+                className="h-4 text-muted-foreground"
               >
                 Сбросить
-              </button>
+              </Button>
             )}
           </div>
 
