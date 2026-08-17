@@ -7,7 +7,7 @@ import {
 
 export interface LibraryFilters {
   search: string;
-  status: BookReadingStatus | null;
+  readingStatus: BookReadingStatus | null;
   format: BookFormat | null;
   tags: string[];
   tagLogic: "OR" | "AND";
@@ -16,7 +16,7 @@ export interface LibraryFilters {
 
 export const defaultFilters: LibraryFilters = {
   search: "",
-  status: null,
+  readingStatus: null,
   format: null,
   tags: [],
   tagLogic: "OR",
@@ -41,7 +41,7 @@ export function useLibraryFilters(books: LibraryBook[]) {
     () =>
       [
         filters.search !== "",
-        filters.status !== null,
+        filters.readingStatus !== null,
         filters.format !== null,
         filters.tags.length > 0,
         filters.isFavorite !== null,
@@ -60,7 +60,10 @@ export function useLibraryFilters(books: LibraryBook[]) {
         if (!matchesSearch) return false;
       }
 
-      if (filters.status && book.readingStatus !== filters.status) {
+      if (
+        filters.readingStatus &&
+        book.readingStatus !== filters.readingStatus
+      ) {
         return false;
       }
 

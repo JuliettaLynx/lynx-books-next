@@ -17,8 +17,8 @@ import { ResetFiltersButton } from "@/components/filters/ResetFiltersButton";
 export interface FilterBarProps {
   search: string;
   onSearchChange: (value: string) => void;
-  status: BookReadingStatus | null;
-  onStatusChange: (value: BookReadingStatus | null) => void;
+  readingStatus: BookReadingStatus | null;
+  onReadingStatusChange: (value: BookReadingStatus | null) => void;
   format: BookFormat | null;
   onFormatChange: (value: BookFormat | null) => void;
   tags: string[];
@@ -35,8 +35,8 @@ export interface FilterBarProps {
 export function FilterBar({
   search,
   onSearchChange,
-  status,
-  onStatusChange,
+  readingStatus,
+  onReadingStatusChange,
   format,
   onFormatChange,
   tags,
@@ -68,8 +68,10 @@ export function FilterBar({
         <div className="flex gap-2 justify-start">
           <SingleFilterBox
             options={STATUS_OPTIONS}
-            value={status}
-            onChange={(val) => onStatusChange(val as BookReadingStatus | null)}
+            value={readingStatus}
+            onChange={(val) =>
+              onReadingStatusChange(val as BookReadingStatus | null)
+            }
             placeholder="● Статус"
             className="w-full"
           />

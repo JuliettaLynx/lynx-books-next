@@ -28,8 +28,7 @@ export interface LibraryBook {
   isFavorite: boolean;
   review?: string;
   rating?: number;
-  quotes?: Quote[];
-  notes?: string;
+  quotes: Quote[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -45,10 +44,4 @@ export const STATUS_LABELS: Record<BookReadingStatus, string> = {
   "не прочитано": "Не прочитано",
   прочитано: "Прочитано",
   брошено: "Брошено",
-};
-
-export const STATUS_COLORS: Record<BookReadingStatus, string> = {
-  "не прочитано": "text-muted-foreground",
-  прочитано: "text-success",
-  брошено: "text-destructive",
 };
