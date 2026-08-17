@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -8,7 +8,10 @@ import {
   AddBookSchema,
 } from "@/features/library/model/validation";
 import { AddModal } from "@/components/AddModal";
-import { addBookAction } from "@/features/library/api/actions";
+import {
+  addBookAction,
+  updateBookAction,
+} from "@/features/library/api/actions";
 import { showSuccess, showError } from "@/shared/lib/toast";
 import { FieldInput } from "@/components/FieldInput";
 import { FieldTags } from "@/components/FieldTags";
@@ -23,23 +26,25 @@ import {
   STATUS_OPTIONS,
 } from "@/features/library/config/filterOptions";
 import { Textarea } from "@/components/ui/textarea";
+import type { LibraryBook } from "@/shared/models/Book";
 
 interface AddBookModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editBook?: LibraryBook | null;
 }
 
 type Quote = { id: string; text: string; page?: number };
 
-export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
+export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
+  const isEditMode = !!editBook;
+
   const {
     register,
     handleSubmit,
     reset,
     control,
     watch,
-    setValue,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<AddBookInput>({
     resolver: zodResolver(AddBookSchema),
@@ -72,6 +77,62 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
 
   const currentStatus = watch("readingStatus");
   const currentRating = watch("rating");
+
+  useEffect(() => {
+    if (isEditMode && editBook && isOpen) {
+      setSelectedTags(editBook.tags);
+      setCoverPreview(editBook.cover ?? null);
+      setCoverFile(null);
+      setQuotes(
+        editBook.quotes.map((q) => ({
+          id: q._id ?? Date.now().toString(),
+          text: q.text,
+          page: q.page,
+        })),
+      );
+      setQuoteText("");
+      setQuotePage(undefined);
+      setEditingId(null);
+
+      reset({
+        title: editBook.title,
+        author: editBook.author,
+        publisher: editBook.publisher ?? "",
+        series: editBook.series ?? "",
+        isbn: editBook.isbn ?? "",
+        annotation: editBook.annotation ?? "",
+        pages: editBook.pages,
+        cover: editBook.cover ?? "",
+        tags: editBook.tags,
+        readingStatus: editBook.readingStatus,
+        format: editBook.format,
+        rating: editBook.rating,
+        review: editBook.review ?? "",
+        quotes: [],
+      });
+    } else if (!isEditMode && isOpen) {
+      reset({
+        title: "",
+        author: "",
+        publisher: "",
+        series: "",
+        isbn: "",
+        annotation: "",
+        pages: undefined,
+        cover: "",
+        tags: [],
+        readingStatus: "не прочитано",
+        format: "бумажная",
+        rating: undefined,
+        review: "",
+        quotes: [],
+      });
+      setSelectedTags([]);
+      setCoverPreview(null);
+      setCoverFile(null);
+      setQuotes([]);
+    }
+  }, [isEditMode, editBook, isOpen, reset]);
 
   const handleSaveQuote = () => {
     const trimmed = quoteText.trim();
@@ -131,15 +192,25 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       });
     }
 
-    const result = await addBookAction({
-      ...data,
-      tags: selectedTags,
-      cover: coverData || undefined,
-      quotes: quotes.map(({ id, ...rest }) => rest),
-    });
+    const result =
+      isEditMode && editBook
+        ? await updateBookAction(editBook._id, {
+            ...data,
+            tags: selectedTags,
+            cover: coverData || undefined,
+            quotes: quotes.map(({ id, ...rest }) => rest),
+          })
+        : await addBookAction({
+            ...data,
+            tags: selectedTags,
+            cover: coverData || undefined,
+            quotes: quotes.map(({ id, ...rest }) => rest),
+          });
 
     if (result.success) {
-      showSuccess("Книга добавлена в библиотеку");
+      showSuccess(
+        isEditMode ? "Книга обновлена" : "Книга добавлена в библиотеку",
+      );
       reset();
       setSelectedTags([]);
       setCoverPreview(null);
@@ -150,7 +221,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       setEditingId(null);
       onClose();
     } else {
-      showError("Ошибка при добавлении книги", result.error);
+      showError("Ошибка", result.error);
     }
   };
 
@@ -162,7 +233,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
     <AddModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Добавить книгу"
+      title={isEditMode ? "Редактировать книгу" : "Добавить книгу"}
       onSubmit={handleFormSubmit}
       isSubmitting={isSubmitting}
     >
@@ -228,7 +299,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
 
       <FieldInput
         label="ISBN"
-        register={register("series")}
+        register={register("isbn")}
         placeholder="Номер isbn"
       />
 

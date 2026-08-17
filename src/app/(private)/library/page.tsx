@@ -6,7 +6,11 @@ import { FilterBar } from "@/features/library/ui/FilterBar";
 import { AddBookModal } from "@/features/library/ui/AddBookModal";
 import { EmptyState } from "@/components/EmptyState";
 import { useLibraryFilters } from "@/features/library/hooks/useLibraryFilters";
-import { getBooks } from "@/features/library/api/actions";
+import {
+  getBooks,
+  toggleFavoriteAction,
+  deleteBookAction,
+} from "@/features/library/api/actions";
 import type { LibraryBook } from "@/shared/models/Book";
 
 import { LibraryBig, BookDashed, Plus } from "lucide-react";
@@ -43,6 +47,7 @@ export default function LibraryPage() {
 
   const [tagLogic, setTagLogic] = useState<"OR" | "AND">("OR");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState<LibraryBook | null>(null);
 
   const handleTagLogicChange = (value: "OR" | "AND") => {
     setTagLogic(value);
@@ -118,8 +123,36 @@ export default function LibraryPage() {
             <BookCard
               key={String(book._id)}
               book={book}
-              onToggleLike={(id) => {
-                console.log("Toggle favorite:", id);
+              onToggleLike={async (id) => {
+                const result = await toggleFavoriteAction(id);
+                if (result.success) {
+                  setBooks((prev) =>
+                    prev.map((b) =>
+                      String(b._id) === String(id)
+                        ? { ...b, isFavorite: !b.isFavorite }
+                        : b,
+                    ),
+                  );
+                } else {
+                  console.error("Toggle favorite failed:", result.error);
+                }
+              }}
+              onDelete={async (id) => {
+                const result = await deleteBookAction(id);
+                if (result.success) {
+                  setBooks((prev) =>
+                    prev.filter((b) => String(b._id) !== String(id)),
+                  );
+                } else {
+                  console.error("Delete failed:", result.error);
+                }
+              }}
+              onEdit={(id) => {
+                const book = books.find((b) => String(b._id) === String(id));
+                if (book) {
+                  setEditingBook(book);
+                  setIsModalOpen(true);
+                }
               }}
             />
           ))}
@@ -146,8 +179,10 @@ export default function LibraryPage() {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
+          setEditingBook(null);
           loadBooks();
         }}
+        editBook={editingBook}
       />
     </div>
   );

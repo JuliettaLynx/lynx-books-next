@@ -16,7 +16,7 @@ export const AddBookSchema = z.object({
   tags: z.array(z.string()).optional(),
   readingStatus: z.enum(["не прочитано", "прочитано", "брошено"]).optional(),
   format: z.enum(["бумажная", "электронная", "аудио"]).optional(),
-  rating: z.number().min(1).max(10).optional(),
+  rating: z.number().min(0).max(10).optional(),
   review: z.string().optional(),
   quotes: z
     .array(
