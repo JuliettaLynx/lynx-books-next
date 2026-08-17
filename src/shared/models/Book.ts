@@ -20,7 +20,7 @@ export interface LibraryBook {
   cover?: string | null;
   publisher?: string;
   series?: string;
-  pages: number;
+  pages?: number;
 
   tags: string[];
   format: BookFormat;

@@ -1,0 +1,84 @@
+"use server";
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/shared/lib/auth";
+import clientPromise, { dbName } from "@/shared/lib/db";
+import {
+  AddBookSchema,
+  type AddBookInput,
+} from "@/features/library/model/validation";
+import type { LibraryBook } from "@/shared/models/Book";
+
+export async function addBookAction(input: AddBookInput) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Необходимо авторизоваться" };
+  }
+  const userId = (session.user as any).id ?? session.user.email;
+  if (!userId) {
+    return { success: false, error: "Не удалось определить пользователя" };
+  }
+
+  const validated = AddBookSchema.safeParse(input);
+  if (!validated.success) {
+    const firstError = validated.error.issues[0]?.message || "Ошибка валидации";
+    return { success: false, error: firstError };
+  }
+
+  const data = validated.data;
+
+  try {
+    const client = await clientPromise;
+    const db = client.db(dbName);
+    const books = db.collection("books");
+
+    const newBook = {
+      userId,
+      title: data.title,
+      author: data.author,
+      pages: data.pages,
+      publisher: data.publisher || undefined,
+      series: data.series || undefined,
+      isbn: data.isbn || undefined,
+      annotation: data.annotation || undefined,
+      cover: data.cover || undefined,
+      tags: data.tags || [],
+      readingStatus: data.readingStatus,
+      format: data.format,
+      isFavorite: false,
+      rating: data.rating ?? 0,
+      review: data.review || undefined,
+      quotes: data.quotes || [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await books.insertOne(newBook);
+    return { success: true, error: undefined };
+  } catch (error) {
+    console.error("addBookAction error:", error);
+    return { success: false, error: "Ошибка при сохранении книги" };
+  }
+}
+
+export async function getBooks(): Promise<LibraryBook[]> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return [];
+  const userId = (session.user as any).id ?? session.user.email;
+  if (!userId) return [];
+
+  try {
+    const client = await clientPromise;
+    const db = client.db(dbName);
+    const books = db.collection("books");
+    const result = await books.find({ userId }).toArray();
+
+    return result.map((book) => ({
+      ...book,
+      _id: book._id.toString(),
+    })) as LibraryBook[];
+  } catch (error) {
+    console.error("getBooks error:", error);
+    return [];
+  }
+}
