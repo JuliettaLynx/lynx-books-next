@@ -3,6 +3,7 @@ import { Field, FieldLabel, FieldContent } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Hint } from "@/components/Hint";
 
 interface FieldTagsProps {
   label: string;
@@ -34,14 +35,26 @@ export function FieldTags({ label, value, onChange }: FieldTagsProps) {
 
   return (
     <Field className="gap-0.5">
-      <FieldLabel className="text-xs text-muted-foreground">{label}</FieldLabel>
+      <div className="flex items-center gap-2">
+        <FieldLabel className="text-xs text-muted-foreground">
+          {label}
+        </FieldLabel>
+        <Hint
+          text={`Теги — ваш личный способ группировки книг.
+                • источник: «Из ТикТока», «Книжный клуб»
+                • время: «Прочитать в сентябре»
+                • настроение: «Для души», «Для работы»
+                • жанр: «Фантастика», «Детектив»`}
+        />
+      </div>
+
       <FieldContent>
         <div className="flex gap-2">
           <Input
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ввведите и добавьте тег"
+            placeholder="Введите и добавьте тег"
           />
           <Button
             type="button"
