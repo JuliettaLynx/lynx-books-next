@@ -16,10 +16,11 @@ export interface LibraryBook {
   author: string;
   isbn?: string;
   annotation?: string;
+  seriesName?: string;
+  seriesNumber?: number;
 
   cover?: string | null;
   publisher?: string;
-  series?: string;
   pages?: number;
 
   tags: string[];

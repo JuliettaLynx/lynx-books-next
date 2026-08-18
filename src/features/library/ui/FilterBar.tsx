@@ -30,6 +30,15 @@ export interface FilterBarProps {
   isFavorite: boolean | null;
   onFavoriteChange: (value: boolean | null) => void;
   activeFilterCount: number;
+  seriesName: string | null;
+  onSeriesNameChange: (value: string | null) => void;
+  author: string | null;
+  onAuthorChange: (value: string | null) => void;
+  publisher: string | null;
+  onPublisherChange: (value: string | null) => void;
+  allSeries: string[];
+  allAuthors: string[];
+  allPublishers: string[];
 }
 
 export function FilterBar({
@@ -48,6 +57,15 @@ export function FilterBar({
   activeFilterCount,
   isFavorite,
   onFavoriteChange,
+  seriesName,
+  onSeriesNameChange,
+  author,
+  onAuthorChange,
+  publisher,
+  onPublisherChange,
+  allSeries,
+  allAuthors,
+  allPublishers,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -61,6 +79,30 @@ export function FilterBar({
           onChange={onTagsChange}
           placeholder="Теги"
           className="flex-1 min-w-37.5"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <SingleFilterBox
+          options={allSeries.map((s) => ({ label: s, value: s }))}
+          value={seriesName}
+          onChange={onSeriesNameChange}
+          placeholder="● Серия"
+          className="flex-1 min-w-36"
+        />
+        <SingleFilterBox
+          options={allAuthors.map((a) => ({ label: a, value: a }))}
+          value={author}
+          onChange={onAuthorChange}
+          placeholder="● Автор"
+          className="flex-1 min-w-36"
+        />
+        <SingleFilterBox
+          options={allPublishers.map((p) => ({ label: p, value: p }))}
+          value={publisher}
+          onChange={onPublisherChange}
+          placeholder="● Издательство"
+          className="flex-1 min-w-36"
         />
       </div>
 

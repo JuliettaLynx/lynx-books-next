@@ -43,6 +43,9 @@ export default function LibraryPage() {
     activeFilterCount,
     filteredBooks,
     allTags,
+    allSeries,
+    allAuthors,
+    allPublishers,
   } = useLibraryFilters(books);
 
   const [tagLogic, setTagLogic] = useState<"OR" | "AND">("OR");
@@ -98,12 +101,21 @@ export default function LibraryPage() {
         allTags={allTags}
         onReset={resetFilters}
         activeFilterCount={activeFilterCount}
+        seriesName={filters.seriesName}
+        onSeriesNameChange={(v) => updateFilter("seriesName", v)}
+        author={filters.author}
+        onAuthorChange={(v) => updateFilter("author", v)}
+        publisher={filters.publisher}
+        onPublisherChange={(v) => updateFilter("publisher", v)}
+        allSeries={allSeries}
+        allAuthors={allAuthors}
+        allPublishers={allPublishers}
       />
 
-      <div className="flex flex-col gap-2 md:flex-row-reverse">
+      <div className="flex flex-col gap-2 sm:flex-row-reverse">
         <Button
           onClick={() => setIsModalOpen(true)}
-          className="w-full md:w-auto md:ml-auto"
+          className="w-full sm:w-auto sm:ml-auto"
         >
           <Plus className="size-4 mr-2" />
           Добавить книгу

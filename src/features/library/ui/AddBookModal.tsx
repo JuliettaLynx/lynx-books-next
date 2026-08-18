@@ -18,7 +18,7 @@ import {
   STATUS_OPTIONS,
 } from "@/features/library/config/filterOptions";
 import type { LibraryBook } from "@/shared/models/Book";
-import { compressImage } from '@/shared/lib/compressImage';
+import { compressImage } from "@/shared/lib/compressImage";
 import { showSuccess, showError } from "@/shared/lib/toast";
 
 import { FieldInput } from "@/components/FieldInput";
@@ -30,6 +30,7 @@ import { QuoteInput } from "@/components/QuoteInput";
 import { QuoteList } from "@/components/QuoteList";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -55,7 +56,8 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       title: "",
       author: "",
       publisher: "",
-      series: "",
+      seriesName: "",
+      seriesNumber: undefined,
       isbn: "",
       annotation: "",
       pages: undefined,
@@ -77,6 +79,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [quoteText, setQuoteText] = useState("");
   const [quotePage, setQuotePage] = useState<number | undefined>(undefined);
+  const [isInSeries, setIsInSeries] = useState(false);
 
   const currentStatus = watch("readingStatus");
   const currentRating = watch("rating");
@@ -96,12 +99,14 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       setQuoteText("");
       setQuotePage(undefined);
       setEditingId(null);
+      setIsInSeries(!!editBook.seriesName);
 
       reset({
         title: editBook.title,
         author: editBook.author,
         publisher: editBook.publisher ?? "",
-        series: editBook.series ?? "",
+        seriesName: editBook.seriesName ?? "",
+        seriesNumber: editBook.seriesNumber,
         isbn: editBook.isbn ?? "",
         annotation: editBook.annotation ?? "",
         pages: editBook.pages,
@@ -118,7 +123,8 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
         title: "",
         author: "",
         publisher: "",
-        series: "",
+        seriesName: "",
+        seriesNumber: undefined,
         isbn: "",
         annotation: "",
         pages: undefined,
@@ -134,6 +140,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       setCoverPreview(null);
       setCoverFile(null);
       setQuotes([]);
+      setIsInSeries(false);
     }
   }, [isEditMode, editBook, isOpen, reset]);
 
@@ -185,6 +192,25 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   };
 
   const onSubmit = async (data: AddBookInput) => {
+    if (isInSeries) {
+      const nameEmpty = !data.seriesName?.trim();
+      const numberInvalid =
+        data.seriesNumber === undefined || data.seriesNumber <= 0;
+
+      if (nameEmpty && numberInvalid) {
+        showError("Укажите название серии и номер книги в ней");
+        return;
+      }
+      if (nameEmpty) {
+        showError("Укажите название серии");
+        return;
+      }
+      if (numberInvalid) {
+        showError("Номер в серии должен быть больше 0");
+        return;
+      }
+    }
+
     let coverUrl = data.cover;
 
     if (coverFile) {
@@ -213,20 +239,19 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       }
     }
 
+    const payload = {
+      ...data,
+      tags: selectedTags,
+      cover: coverUrl || undefined,
+      quotes: quotes.map(({ id, ...rest }) => rest),
+      seriesName: isInSeries ? data.seriesName : undefined,
+      seriesNumber: isInSeries ? data.seriesNumber : undefined,
+    };
+
     const result =
       isEditMode && editBook
-        ? await updateBookAction(editBook._id, {
-            ...data,
-            tags: selectedTags,
-            cover: coverUrl || undefined,
-            quotes: quotes.map(({ id, ...rest }) => rest),
-          })
-        : await addBookAction({
-            ...data,
-            tags: selectedTags,
-            cover: coverUrl || undefined,
-            quotes: quotes.map(({ id, ...rest }) => rest),
-          });
+        ? await updateBookAction(editBook._id, payload)
+        : await addBookAction(payload);
 
     if (result.success) {
       showSuccess(
@@ -240,6 +265,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       setQuoteText("");
       setQuotePage(undefined);
       setEditingId(null);
+      setIsInSeries(false);
       onClose();
     } else {
       showError("Ошибка", result.error);
@@ -289,7 +315,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
               setValueAs: (v) => (v === "" ? undefined : Number(v)),
             })}
             type="number"
-            placeholder="123"
+            placeholder="100500"
             min={1}
           />
         </div>
@@ -306,23 +332,52 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
           <FieldInput
             label="ИЗДАТЕЛЬСТВО"
             register={register("publisher")}
-            placeholder="Издательство"
+            placeholder="Магистраль"
           />
         </div>
         <div>
           <FieldInput
-            label="СЕРИЯ"
-            register={register("series")}
-            placeholder="Название серии"
+            label="ISBN"
+            register={register("isbn")}
+            placeholder="978-5-04-168878-3"
           />
         </div>
       </div>
 
-      <FieldInput
-        label="ISBN"
-        register={register("isbn")}
-        placeholder="Номер isbn"
-      />
+      <Separator />
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="isInSeries"
+          checked={isInSeries}
+          onCheckedChange={(checked) => setIsInSeries(!!checked)}
+        />
+        <label
+          htmlFor="isInSeries"
+          className="text-sm text-secondary-foreground font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Книга из серии?
+        </label>
+      </div>
+
+      {isInSeries && (
+        <div className="grid grid-cols-2 gap-4">
+          <FieldInput
+            label="НАЗВАНИЕ СЕРИИ"
+            register={register("seriesName")}
+            placeholder="Гарри Поттер"
+          />
+          <FieldInput
+            label="НОМЕР В СЕРИИ"
+            register={register("seriesNumber", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="number"
+            placeholder="123"
+            min={1}
+          />
+        </div>
+      )}
 
       <Separator />
 

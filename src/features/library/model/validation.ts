@@ -4,7 +4,8 @@ export const AddBookSchema = z.object({
   title: z.string().trim().nonempty("Название обязательно").min(1).max(200),
   author: z.string().trim().nonempty("Автор обязателен").min(1).max(150),
   publisher: z.string().trim().max(150).optional(),
-  series: z.string().trim().max(150).optional(),
+  seriesName: z.string().trim().max(150).optional(),
+  seriesNumber: z.number().int().positive().optional(),
   isbn: z.string().trim().optional(),
   annotation: z.string().optional(),
   pages: z
