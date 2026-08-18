@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, FileText, Camera, Trash2 } from "lucide-react";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import Image from "next/image";
 
 interface BookCardProps {
   book: LibraryBook;
@@ -37,10 +38,11 @@ export function BookCard({
       <Card className="group/card gap-2 h-full">
         <div className="relative aspect-2/3 w-full overflow-hidden rounded-t-xl bg-muted/30">
           {book.cover ? (
-            <img
+            <Image
               src={book.cover}
               alt={book.title}
-              className="size-full object-cover transition-opacity group-hover/card:opacity-90"
+              fill
+              className="object-cover transition-opacity group-hover/card:opacity-90"
             />
           ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center bg-background/40 -bg-linear-20 from-background/50 from-30% via-chart-3/5 via-70% to-primary/10">

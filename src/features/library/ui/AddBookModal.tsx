@@ -12,7 +12,15 @@ import {
   addBookAction,
   updateBookAction,
 } from "@/features/library/api/actions";
+import { uploadCoverAction } from "@/features/library/api/uploadCoverAction";
+import {
+  FORMAT_OPTIONS,
+  STATUS_OPTIONS,
+} from "@/features/library/config/filterOptions";
+import type { LibraryBook } from "@/shared/models/Book";
+import { compressImage } from '@/shared/lib/compressImage';
 import { showSuccess, showError } from "@/shared/lib/toast";
+
 import { FieldInput } from "@/components/FieldInput";
 import { FieldTags } from "@/components/FieldTags";
 import { FieldImageUpload } from "@/components/FieldImage";
@@ -21,12 +29,7 @@ import { RatingStars } from "@/components/RatingStars";
 import { QuoteInput } from "@/components/QuoteInput";
 import { QuoteList } from "@/components/QuoteList";
 import { Separator } from "@/components/ui/separator";
-import {
-  FORMAT_OPTIONS,
-  STATUS_OPTIONS,
-} from "@/features/library/config/filterOptions";
 import { Textarea } from "@/components/ui/textarea";
-import type { LibraryBook } from "@/shared/models/Book";
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -182,14 +185,32 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   };
 
   const onSubmit = async (data: AddBookInput) => {
-    let coverData = data.cover;
+    let coverUrl = data.cover;
+
     if (coverFile) {
-      const reader = new FileReader();
-      coverData = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(coverFile);
-      });
+      let fileToUpload = coverFile;
+      try {
+        const compressed = await compressImage(coverFile, 100 * 1024);
+        if (compressed) {
+          fileToUpload = compressed;
+          const previewUrl = URL.createObjectURL(compressed);
+          setCoverPreview(previewUrl);
+        } else {
+          console.warn("Не удалось сжать изображение, используется оригинал");
+        }
+      } catch (error) {
+        console.warn("Ошибка сжатия, используется оригинал", error);
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+      try {
+        const result = await uploadCoverAction(formData);
+        coverUrl = result.url;
+      } catch (error) {
+        showError("Ошибка загрузки обложки", (error as Error).message);
+        return;
+      }
     }
 
     const result =
@@ -197,13 +218,13 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
         ? await updateBookAction(editBook._id, {
             ...data,
             tags: selectedTags,
-            cover: coverData || undefined,
+            cover: coverUrl || undefined,
             quotes: quotes.map(({ id, ...rest }) => rest),
           })
         : await addBookAction({
             ...data,
             tags: selectedTags,
-            cover: coverData || undefined,
+            cover: coverUrl || undefined,
             quotes: quotes.map(({ id, ...rest }) => rest),
           });
 

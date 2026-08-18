@@ -4,11 +4,12 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/shared/lib/auth";
 import clientPromise, { dbName } from "@/shared/lib/db";
+import { deleteBlobFile } from "@/shared/lib/blob";
+import type { LibraryBook } from "@/shared/models/Book";
 import {
   AddBookSchema,
   type AddBookInput,
 } from "@/features/library/model/validation";
-import type { LibraryBook } from "@/shared/models/Book";
 
 export async function addBookAction(input: AddBookInput) {
   const session = await getServerSession(authOptions);
@@ -107,6 +108,18 @@ export async function deleteBookAction(bookId: string) {
     const db = client.db(dbName);
     const books = db.collection("books");
 
+    const bookToDelete = await books.findOne({
+      _id: new ObjectId(bookId),
+      userId,
+    });
+    if (!bookToDelete) {
+      return { success: false, error: "Книга не найдена" };
+    }
+
+    if (bookToDelete.cover) {
+      await deleteBlobFile(bookToDelete.cover);
+    }
+
     const result = await books.deleteOne({ _id: new ObjectId(bookId), userId });
 
     if (result.deletedCount === 0) {
@@ -142,6 +155,21 @@ export async function updateBookAction(bookId: string, input: AddBookInput) {
     const db = client.db(dbName);
     const books = db.collection("books");
 
+    const existingBook = await books.findOne({
+      _id: new ObjectId(bookId),
+      userId,
+    });
+    if (!existingBook) {
+      return { success: false, error: "Книга не найдена" };
+    }
+
+    const oldCover = existingBook.cover;
+    const newCover = data.cover;
+
+    if (oldCover && newCover && oldCover !== newCover) {
+      await deleteBlobFile(oldCover);
+    }
+
     const result = await books.updateOne(
       { _id: new ObjectId(bookId), userId },
       {
@@ -153,7 +181,7 @@ export async function updateBookAction(bookId: string, input: AddBookInput) {
           series: data.series || undefined,
           isbn: data.isbn || undefined,
           annotation: data.annotation || undefined,
-          cover: data.cover || undefined,
+          cover: newCover || undefined,
           tags: data.tags || [],
           readingStatus: data.readingStatus,
           format: data.format,
