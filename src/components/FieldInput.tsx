@@ -15,10 +15,14 @@ interface FieldInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const FieldInput = forwardRef<HTMLInputElement, FieldInputProps>(
   ({ label, error, register, ...props }, ref) => {
+    const labelParts = label.split("*");
+
     return (
       <Field className="gap-0.5">
         <FieldLabel className="text-xs text-muted-foreground">
-          {label}
+          {labelParts[0]}
+          {labelParts.length > 1 && <span className="text-red-500">*</span>}
+          {labelParts.slice(1).join("")}
         </FieldLabel>
         <FieldContent>
           <Input ref={ref} {...register} {...props} />

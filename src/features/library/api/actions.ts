@@ -41,7 +41,7 @@ export async function addBookAction(input: AddBookInput) {
       pages: data.pages,
       publisher: data.publisher || undefined,
       seriesName: data.seriesName || undefined,
-      seriesNumber: data.seriesNumber,
+      seriesNumber: data.seriesNumber ?? undefined,
       isbn: data.isbn || undefined,
       annotation: data.annotation || undefined,
       cover: data.cover || undefined,
@@ -49,7 +49,7 @@ export async function addBookAction(input: AddBookInput) {
       readingStatus: data.readingStatus,
       format: data.format,
       isFavorite: false,
-      rating: data.rating ?? 0,
+      rating: data.rating ?? undefined,
       review: data.review || undefined,
       quotes: data.quotes || [],
       createdAt: new Date(),
@@ -81,7 +81,14 @@ export async function toggleFavoriteAction(bookId: string) {
 
     const result = await books.updateOne(
       { _id: new ObjectId(bookId), userId },
-      { $set: { isFavorite: true, updatedAt: new Date() } },
+      [
+        {
+          $set: {
+            isFavorite: { $not: "$isFavorite" },
+            updatedAt: new Date(),
+          },
+        },
+      ],
     );
 
     if (result.matchedCount === 0) {
@@ -167,10 +174,6 @@ export async function updateBookAction(bookId: string, input: AddBookInput) {
     const oldCover = existingBook.cover;
     const newCover = data.cover;
 
-    if (oldCover && oldCover !== newCover) {
-      await deleteBlobFile(oldCover);
-    }
-
     const result = await books.updateOne(
       { _id: new ObjectId(bookId), userId },
       {
@@ -180,20 +183,24 @@ export async function updateBookAction(bookId: string, input: AddBookInput) {
           pages: data.pages,
           publisher: data.publisher || undefined,
           seriesName: data.seriesName || undefined,
-          seriesNumber: data.seriesNumber,
+          seriesNumber: data.seriesNumber ?? undefined,
           isbn: data.isbn || undefined,
           annotation: data.annotation || undefined,
           cover: newCover || undefined,
           tags: data.tags || [],
           readingStatus: data.readingStatus,
           format: data.format,
-          rating: data.rating ?? 0,
+          rating: data.rating ?? undefined,
           review: data.review || undefined,
           quotes: data.quotes || [],
           updatedAt: new Date(),
         },
       },
     );
+
+    if (result.matchedCount > 0 && oldCover && oldCover !== newCover) {
+      await deleteBlobFile(oldCover);
+    }
 
     if (result.matchedCount === 0) {
       return { success: false, error: "Книга не найдена" };
@@ -220,6 +227,13 @@ export async function getBooks(): Promise<LibraryBook[]> {
     return result.map((book) => ({
       ...book,
       _id: book._id.toString(),
+      seriesNumber: book.seriesNumber ?? undefined,
+      rating: book.rating ?? undefined,
+      publisher: book.publisher ?? undefined,
+      seriesName: book.seriesName ?? undefined,
+      isbn: book.isbn ?? undefined,
+      annotation: book.annotation ?? undefined,
+      review: book.review ?? undefined,
     })) as LibraryBook[];
   } catch (error) {
     console.error("getBooks error:", error);

@@ -117,7 +117,11 @@ export function AddModal({
         <CardHeader className="bg-muted/50 p-3">
           <CardTitle className="text-xl flex justify-center">{title}</CardTitle>
         </CardHeader>
-        <form onSubmit={onSubmit} className="flex flex-col flex-1 min-h-0">
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="flex flex-col flex-1 min-h-0"
+        >
           <CardContent className="flex-1 overflow-y-auto space-y-4 py-4">
             {children}
           </CardContent>

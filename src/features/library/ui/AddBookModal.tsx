@@ -49,6 +49,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
     reset,
     control,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AddBookInput>({
     resolver: zodResolver(AddBookSchema),
@@ -68,6 +69,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       rating: undefined,
       review: "",
       quotes: [],
+      isInSeries: false,
     },
   });
 
@@ -85,8 +87,12 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   const currentRating = watch("rating");
 
   useEffect(() => {
+    setValue("isInSeries", isInSeries);
+  }, [isInSeries, setValue]);
+
+  useEffect(() => {
     if (isEditMode && editBook && isOpen) {
-      setSelectedTags(editBook.tags);
+      setSelectedTags(editBook.tags ?? []);
       setCoverPreview(editBook.cover ?? null);
       setCoverFile(null);
       setQuotes(
@@ -100,21 +106,22 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       setQuotePage(undefined);
       setEditingId(null);
       setIsInSeries(!!editBook.seriesName);
+      setValue("isInSeries", !!editBook.seriesName);
 
       reset({
         title: editBook.title,
         author: editBook.author,
         publisher: editBook.publisher ?? "",
         seriesName: editBook.seriesName ?? "",
-        seriesNumber: editBook.seriesNumber,
+        seriesNumber: editBook.seriesNumber ?? undefined,
         isbn: editBook.isbn ?? "",
         annotation: editBook.annotation ?? "",
         pages: editBook.pages,
         cover: editBook.cover ?? "",
-        tags: editBook.tags,
+        tags: editBook.tags ?? [],
         readingStatus: editBook.readingStatus,
         format: editBook.format,
-        rating: editBook.rating,
+        rating: editBook.rating ?? undefined,
         review: editBook.review ?? "",
         quotes: [],
       });
@@ -141,6 +148,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       setCoverFile(null);
       setQuotes([]);
       setIsInSeries(false);
+      setValue("isInSeries", false);
     }
   }, [isEditMode, editBook, isOpen, reset]);
 
@@ -192,25 +200,6 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   };
 
   const onSubmit = async (data: AddBookInput) => {
-    if (isInSeries) {
-      const nameEmpty = !data.seriesName?.trim();
-      const numberInvalid =
-        data.seriesNumber === undefined || data.seriesNumber <= 0;
-
-      if (nameEmpty && numberInvalid) {
-        showError("Укажите название серии и номер книги в ней");
-        return;
-      }
-      if (nameEmpty) {
-        showError("Укажите название серии");
-        return;
-      }
-      if (numberInvalid) {
-        showError("Номер в серии должен быть больше 0");
-        return;
-      }
-    }
-
     let coverUrl = data.cover;
 
     if (coverFile) {
@@ -291,6 +280,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
             onChange={(file, preview) => {
               setCoverFile(file);
               setCoverPreview(preview);
+              setValue("cover", preview || "");
             }}
           />
         </div>
@@ -310,13 +300,14 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
           />
 
           <FieldInput
-            label="КОЛИЧЕСТВО СТРАНИЦ"
+            label="КОЛИЧЕСТВО СТРАНИЦ *"
             register={register("pages", {
               setValueAs: (v) => (v === "" ? undefined : Number(v)),
             })}
             type="number"
-            placeholder="100500"
+            placeholder="350"
             min={1}
+            error={errors.pages}
           />
         </div>
       </div>
@@ -363,18 +354,20 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       {isInSeries && (
         <div className="grid grid-cols-2 gap-4">
           <FieldInput
-            label="НАЗВАНИЕ СЕРИИ"
+            label="НАЗВАНИЕ СЕРИИ *"
             register={register("seriesName")}
             placeholder="Гарри Поттер"
+            error={errors.seriesName}
           />
           <FieldInput
-            label="НОМЕР В СЕРИИ"
+            label="НОМЕР В СЕРИИ *"
             register={register("seriesNumber", {
               setValueAs: (v) => (v === "" ? undefined : Number(v)),
             })}
             type="number"
-            placeholder="123"
+            placeholder="1"
             min={1}
+            error={errors.seriesNumber}
           />
         </div>
       )}
