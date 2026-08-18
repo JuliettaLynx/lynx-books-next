@@ -167,7 +167,7 @@ export async function updateBookAction(bookId: string, input: AddBookInput) {
     const oldCover = existingBook.cover;
     const newCover = data.cover;
 
-    if (oldCover && newCover && oldCover !== newCover) {
+    if (oldCover && oldCover !== newCover) {
       await deleteBlobFile(oldCover);
     }
 

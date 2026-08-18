@@ -1,6 +1,7 @@
-import { useRef, useState, ChangeEvent } from "react";
+import { useRef, ChangeEvent } from "react";
 import Image from "next/image";
 import { Field, FieldContent } from "@/components/ui/field";
+import { X } from "lucide-react";
 
 interface FieldImageUploadProps {
   value: string | null;
@@ -28,6 +29,11 @@ export function FieldImageUpload({ value, onChange }: FieldImageUploadProps) {
     }
   };
 
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange(null, null);
+  };
+
   return (
     <Field>
       <FieldContent>
@@ -36,7 +42,17 @@ export function FieldImageUpload({ value, onChange }: FieldImageUploadProps) {
           onClick={handleClick}
         >
           {value ? (
-            <Image src={value} alt="Обложка" fill className="object-cover" />
+            <>
+              <Image src={value} alt="Обложка" fill className="object-cover" />
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 transition-colors"
+                aria-label="Удалить обложку"
+              >
+                <X className="size-5" />
+              </button>
+            </>
           ) : (
             <span className="text-muted-foreground text-sm">Загрузить</span>
           )}
