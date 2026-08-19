@@ -1,34 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { LibraryBook } from "@/shared/models/Book";
 import { BookCard } from "@/features/library/ui/BookCard";
 import { FilterBar } from "@/features/library/ui/FilterBar";
 import { AddBookModal } from "@/features/library/ui/AddBookModal";
-import { EmptyState } from "@/components/EmptyState";
 import { useLibraryFilters } from "@/features/library/hooks/useLibraryFilters";
 import {
   getBooks,
   toggleFavoriteAction,
   deleteBookAction,
 } from "@/features/library/api/actions";
-import type { LibraryBook } from "@/shared/models/Book";
 
-import { LibraryBig, BookDashed, Plus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonFilterBar } from "@/features/library/ui/SkeletonFilterBar";
+
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/EmptyState";
+import { LibraryBig, BookDashed, Plus } from "lucide-react";
 
 export default function LibraryPage() {
   const [books, setBooks] = useState<LibraryBook[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadBooks = async () => {
-    setLoading(true);
+  const loadBooks = async (showLoader = true) => {
+    if (showLoader) setLoading(true);
     try {
       const data = await getBooks();
       setBooks(data);
     } catch (error) {
       console.error("Failed to load books", error);
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -73,8 +76,23 @@ export default function LibraryPage() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 flex items-center justify-center h-40">
-        <div className="text-muted-foreground">Загрузка библиотеки...</div>
+      <div className="p-4 md:p-6 space-y-4">
+        <h1 className="pt-1 tracking-wider text-2xl font-bold text-foreground">
+          Моя библиотека
+        </h1>
+
+        <SkeletonFilterBar />
+
+        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+          <Skeleton className="h-8 w-full sm:w-40 sm:ml-auto rounded-lg" />
+          <Skeleton className="h-8 w-32 rounded-lg" />
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-5/9 w-full rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -192,7 +210,7 @@ export default function LibraryPage() {
         onClose={() => {
           setIsModalOpen(false);
           setEditingBook(null);
-          loadBooks();
+          loadBooks(false);
         }}
         editBook={editingBook}
       />
