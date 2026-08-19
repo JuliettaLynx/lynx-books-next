@@ -28,7 +28,6 @@ export function FavoriteToggle({ value, onChange }: FavoriteToggleProps) {
         className={cn(toggleStyle, "rounded-r-none")}
       >
         <Heart className="size-3.5" />
-        <span className="hidden min-[390px]:block">Избранное</span>
       </ToggleGroupItem>
       <ToggleGroupItem
         value="not-favorite"
@@ -36,7 +35,6 @@ export function FavoriteToggle({ value, onChange }: FavoriteToggleProps) {
         className={cn(toggleStyle, "rounded-l-none")}
       >
         <HeartOff className="size-3.5" />
-        <span className="hidden min-[390px]:block">Не избранное</span>
       </ToggleGroupItem>
     </ToggleGroup>
   );

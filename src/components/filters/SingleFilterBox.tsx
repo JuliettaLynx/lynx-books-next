@@ -56,9 +56,6 @@ export function SingleFilterBox({
         )}
       >
         <div className="flex items-center gap-1.5 truncate">
-          {selectedOption?.icon && (
-            <selectedOption.icon className="size-3.5 shrink-0 hidden min-[390px]:block" />
-          )}
           <span className="truncate">
             {selectedOption?.label || placeholder}
           </span>
@@ -77,7 +74,6 @@ export function SingleFilterBox({
         <ComboboxList className="max-h-52 overflow-y-auto p-1">
           {options.map((opt) => {
             const isSelected = opt.value === value;
-            const Icon = opt.icon;
             return (
               <ComboboxItem
                 key={opt.value}
@@ -89,7 +85,6 @@ export function SingleFilterBox({
                   isSelected && "text-primary font-medium",
                 )}
               >
-                {Icon && <Icon className="size-4 shrink-0" />}
                 <span className="truncate">{opt.label}</span>
               </ComboboxItem>
             );

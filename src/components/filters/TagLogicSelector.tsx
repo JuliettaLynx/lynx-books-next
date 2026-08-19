@@ -10,7 +10,7 @@ interface TagLogicSelectorProps {
 
 export function TagLogicSelector({ value, onChange }: TagLogicSelectorProps) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 h-auto py-1">
+    <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 h-8 py-1">
       <RadioGroup
         value={value}
         onValueChange={(val) => onChange(val as "OR" | "AND")}
