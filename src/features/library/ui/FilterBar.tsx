@@ -67,11 +67,11 @@ export function FilterBar({
   allPublishers,
 }: FilterBarProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <SearchInput value={search} onChange={onSearchChange} />
 
-      <div className="flex gap-3 items-center">
-        <div className="hidden sm:inline-flex">
+      <div className="flex gap-2 mt-1 items-center">
+        <div className="hidden mr-1 sm:inline-flex">
           <FavoriteToggle value={isFavorite} onChange={onFavoriteChange} />
         </div>
         <TagLogicSelector value={tagLogic} onChange={onTagLogicChange} />
@@ -84,7 +84,7 @@ export function FilterBar({
         />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-3">
+      <div className="flex flex-col lg:flex-row gap-2">
         <div className="flex flex-wrap gap-2 flex-1">
           <SingleFilterBox
             options={allSeries.map((s) => ({ label: s, value: s }))}
