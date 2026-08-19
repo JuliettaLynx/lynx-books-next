@@ -1,14 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import { LibraryBook, STATUS_LABELS } from "@/shared/models/Book";
-import { FORMAT_OPTIONS } from "@/features/library/config/filterOptions";
 import { cn } from "@/shared/lib/utils";
+import { FORMAT_OPTIONS } from "@/features/library/config/filterOptions";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, FileText, Camera, Trash2 } from "lucide-react";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import Image from "next/image";
+import { Heart, FileText, Camera, Trash2 } from "lucide-react";
 
 interface BookCardProps {
   book: LibraryBook;
@@ -42,7 +42,7 @@ export function BookCard({
               src={book.cover}
               alt={book.title}
               fill
-              className="object-cover transition-opacity group-hover/card:opacity-90"
+              className="object-cover transition-transform duration-300 group-hover/card:scale-105"
             />
           ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center bg-background/40 -bg-linear-20 from-background/50 from-30% via-chart-3/5 via-70% to-primary/10">
@@ -52,8 +52,8 @@ export function BookCard({
           )}
 
           <div className="absolute left-2 top-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-background/40 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm">
-              <FormatIcon className="size-3" />
+            <span className="h-7 inline-flex items-center gap-1 rounded-lg bg-background/80 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <FormatIcon className="size-3 stroke-[2.5]" />
               {STATUS_LABELS[book.readingStatus]}
             </span>
           </div>
@@ -67,7 +67,7 @@ export function BookCard({
                 onToggleLike?.(book._id);
               }}
               className={cn(
-                "size-9 rounded-lg bg-background/70 backdrop-blur-sm transition-colors dark:hover:bg-background/70 cursor-pointer",
+                "size-9 rounded-lg bg-background/80 dark:hover:bg-background/80 cursor-pointer",
                 book.isFavorite
                   ? "text-destructive hover:text-muted-foreground"
                   : "text-muted-foreground hover:text-destructive",
@@ -75,7 +75,7 @@ export function BookCard({
             >
               <Heart
                 className={cn(
-                  "size-5 stroke-3",
+                  "size-5 stroke-[2.5]",
                   book.isFavorite && "fill-current",
                 )}
               />
@@ -88,10 +88,10 @@ export function BookCard({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-9 rounded-lg bg-background/70 backdrop-blur-sm text-muted-foreground hover:text-destructive dark:hover:bg-background/0 cursor-pointer"
+                      className="size-9 rounded-lg bg-background/80 dark:hover:bg-background/80 text-muted-foreground hover:text-destructive"
                       type="button"
                     >
-                      <Trash2 className="size-5 stroke-3" />
+                      <Trash2 className="size-5 stroke-[2.5]" />
                     </Button>
                   }
                   title="Удалить книгу?"
@@ -109,10 +109,16 @@ export function BookCard({
           <CardTitle className="text-sm font-semibold leading-tight line-clamp-2">
             {book.title}
           </CardTitle>
+          {book.seriesName && (
+            <p className="text-xs text-muted-foreground truncate -mt-1.5">
+              {book.seriesName}
+              {book.seriesNumber ? ` #${book.seriesNumber}` : ""}
+            </p>
+          )}
           <p className="text-xs text-muted-foreground">{book.author}</p>
         </CardHeader>
 
-        <CardContent className="gap-2 px-3 pb-3">
+        <CardContent className="gap-2 px-3">
           <div className="flex flex-wrap gap-1">
             {book.tags.map((tag) => (
               <span
