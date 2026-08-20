@@ -55,7 +55,28 @@ export const createReadingSessionSchema = SessionFieldsSchema.superRefine(
   },
 );
 
-export const updateReadingSessionSchema = createReadingSessionSchema.partial();
+export const updateReadingSessionSchema =
+  SessionFieldsSchema.partial().superRefine((data, ctx) => {
+    if (data.startDate && data.endDate && data.startDate > data.endDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Дата начала не может быть позже даты окончания",
+        path: ["startDate"],
+      });
+    }
+
+    if (
+      data.startPage != null &&
+      data.endPage != null &&
+      data.startPage > data.endPage
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Начальная страница не может быть больше конечной",
+        path: ["startPage"],
+      });
+    }
+  });
 
 export type CreateReadingSessionInput = z.infer<
   typeof createReadingSessionSchema
