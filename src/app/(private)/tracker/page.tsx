@@ -13,8 +13,7 @@ import { LayoutDashboardIcon } from "lucide-react";
 import TrackerHeader from "@/features/tracker/ui/TrackerHeader";
 import TrackerStats from "@/features/tracker/ui/TrackerStats";
 import CalendarGrid from "@/features/tracker/ui/CalendarGrid";
-import { SkeletonCalendar } from "@/features/tracker/ui/SkeletonCalendar";
-import { SkeletonStats } from "@/features/tracker/ui/SkeletonStats";
+import { TrackerSkeleton } from "@/features/tracker/ui/TrackerSkeleton";
 
 export default function TrackerPage() {
   const now = new Date();
@@ -38,7 +37,6 @@ export default function TrackerPage() {
   }, []);
 
   const loadSessions = useCallback(async (y: number, m: number) => {
-    setLoading(true);
     setError(null);
     try {
       const data = await getSessionsForMonth(y, m);
@@ -87,23 +85,19 @@ export default function TrackerPage() {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <div className="space-y-4">
-          <TrackerHeader
-            year={year}
-            month={month}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            onYearChange={handleYearChange}
-          />
-
           {loading || goalLoading ? (
-            <>
-              <SkeletonStats />
-              <SkeletonCalendar />
-            </>
+            <TrackerSkeleton />
           ) : error ? (
             <div className="text-red-500 p-4">{error}</div>
           ) : (
             <>
+              <TrackerHeader
+                year={year}
+                month={month}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                onYearChange={handleYearChange}
+              />
               <TrackerStats sessions={sessions} year={year} month={month} />
               <CalendarGrid
                 year={year}
