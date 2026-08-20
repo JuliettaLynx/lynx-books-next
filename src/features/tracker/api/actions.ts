@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/shared/lib/auth";
 import clientPromise, { dbName } from "@/shared/lib/db";
+import { getUsersCollection } from "@/shared/lib/user-utils";
 import {
   createReadingSessionSchema,
   updateReadingSessionSchema,
@@ -32,6 +33,21 @@ function calculateDurationMinutes(startDate: Date, endDate: Date): number {
 }
 
 // ========== Server Actions ==========
+
+export async function getDailyGoal(): Promise<number> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new Error("Не авторизован");
+  }
+
+  const usersCollection = await getUsersCollection();
+  const user = await usersCollection.findOne(
+    { email: session.user.email },
+    { projection: { dailyGoal: 1 } },
+  );
+
+  return user?.dailyGoal ?? 50;
+}
 
 export async function getSessionsForMonth(
   year: number,

@@ -1,14 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getSessionsForMonth } from "@/features/tracker/api/actions";
+import {
+  getSessionsForMonth,
+  getDailyGoal,
+} from "@/features/tracker/api/actions";
 import type { ReadingSession } from "@/shared/models/ReadingSession";
 
 import { EmptyState } from "@/components/EmptyState";
-import { CalendarIcon, LayoutDashboardIcon } from "lucide-react";
+import { LayoutDashboardIcon } from "lucide-react";
 
 import TrackerHeader from "@/features/tracker/ui/TrackerHeader";
 import TrackerStats from "@/features/tracker/ui/TrackerStats";
+import CalendarGrid from "@/features/tracker/ui/CalendarGrid";
+import { SkeletonCalendar } from "@/features/tracker/ui/SkeletonCalendar";
+import { SkeletonStats } from "@/features/tracker/ui/SkeletonStats";
 
 export default function TrackerPage() {
   const now = new Date();
@@ -17,6 +23,19 @@ export default function TrackerPage() {
   const [sessions, setSessions] = useState<ReadingSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [dailyGoal, setDailyGoal] = useState<number>(50);
+  const [goalLoading, setGoalLoading] = useState(true);
+
+  useEffect(() => {
+    getDailyGoal()
+      .then(setDailyGoal)
+      .catch((err) => {
+        console.error("Failed to load daily goal:", err);
+        setDailyGoal(50);
+      })
+      .finally(() => setGoalLoading(false));
+  }, []);
 
   const loadSessions = useCallback(async (y: number, m: number) => {
     setLoading(true);
@@ -58,11 +77,15 @@ export default function TrackerPage() {
     setYear(newYear);
   };
 
+  const handleDayClick = (date: Date) => {
+    console.log("Clicked day:", date);
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-4">
       <h1 className="text-3xl font-bold">Трекер</h1>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <div className="space-y-4">
           <TrackerHeader
             year={year}
@@ -72,20 +95,22 @@ export default function TrackerPage() {
             onYearChange={handleYearChange}
           />
 
-          {loading ? (
-            <div className="flex justify-center p-8 text-muted-foreground">
-              Загрузка сессий...
-            </div>
+          {loading || goalLoading ? (
+            <>
+              <SkeletonStats />
+              <SkeletonCalendar />
+            </>
           ) : error ? (
             <div className="text-red-500 p-4">{error}</div>
           ) : (
             <>
               <TrackerStats sessions={sessions} year={year} month={month} />
-              <EmptyState
-                title="Календарь"
-                description="Скоро будет добавлен"
-                icon={<CalendarIcon className="size-12" />}
-                className="w-full min-h-50"
+              <CalendarGrid
+                year={year}
+                month={month}
+                sessions={sessions}
+                dailyGoal={dailyGoal}
+                onDayClick={handleDayClick}
               />
             </>
           )}
