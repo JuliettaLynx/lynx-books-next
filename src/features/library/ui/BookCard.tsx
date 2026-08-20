@@ -45,7 +45,7 @@ export function BookCard({
               className="object-cover transition-transform duration-300 group-hover/card:scale-105"
             />
           ) : (
-            <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center bg-background/40 -bg-linear-20 from-background/50 from-30% via-chart-3/5 via-70% to-primary/10">
+            <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center bg-background/40 -bg-linear-20 from-background/50 from-30% to-primary/15">
               <Camera className="size-10 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Нет обложки</span>
             </div>

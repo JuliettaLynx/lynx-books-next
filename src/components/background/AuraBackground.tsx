@@ -7,11 +7,10 @@ export default function AuraBackground() {
       style={{
         background: `radial-gradient(
           ellipse,
-          var(--chart-1),
-          color-mix(in oklch, var(--chart-2) 60%, transparent),
-          color-mix(in oklch, var(--chart-3) 45%, transparent),
-          color-mix(in oklch, var(--chart-4) 30%, transparent),
-          color-mix(in oklch, var(--chart-5) 15%, transparent),
+          var(--primary) 0%,
+          color-mix(in oklch, var(--primary) 60%, transparent) 30%,
+          color-mix(in oklch, var(--primary) 40%, transparent) 50%,
+          color-mix(in oklch, var(--primary) 10%, transparent) 70%,
           transparent 100%
         )`,
       }}

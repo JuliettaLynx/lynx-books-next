@@ -42,7 +42,7 @@ export function AuthForm<T extends FieldValues>({
   onTogglePassword,
 }: AuthFormProps<T>) {
   return (
-    <div className="relative z-30 rounded-2xl p-6 w-full max-w-sm bg-background/40 -bg-linear-20 from-background/20 from-30% via-chart-3/10 via-70% to-primary/20 shadow-[4px_8px_24px_rgba(0,0,0,0.3)]">
+    <div className="relative z-30 rounded-2xl p-6 w-full max-w-sm bg-background/40 -bg-linear-20 from-background/20 from-30% to-primary/20 shadow-[4px_8px_24px_rgba(0,0,0,0.3)]">
       <h1 className="text-foreground text-2xl tracking-wider font-bold text-center pb-4">
         {title}
       </h1>

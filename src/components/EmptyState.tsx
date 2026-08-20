@@ -31,7 +31,7 @@ export function EmptyState({
   return (
     <Empty
       className={cn(
-        "relative top-4 left-1/2 -translate-x-1/2 w-72 bg-background/40 -bg-linear-20 from-background/20 from-30% via-chart-3/10 via-70% to-primary/20 shadow-[4px_8px_24px_rgba(0,0,0,0.3)]",
+        "relative top-4 left-1/2 -translate-x-1/2 w-72 bg-background/40 -bg-linear-20 from-background/20 from-30% to-primary/20 shadow-[4px_8px_24px_rgba(0,0,0,0.3)]",
         className,
       )}
     >
