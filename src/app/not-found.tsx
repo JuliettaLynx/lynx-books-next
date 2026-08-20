@@ -8,7 +8,7 @@ export default function NotFound() {
       <AuraBackground />
       <StarsBackground />
 
-      <div className="relative z-30 rounded-2xl p-6 w-full max-w-sm bg-background/40 -bg-linear-20 from-background/20 from-30% via-chart-3/10 via-70% to-primary/20 shadow-[4px_8px_24px_rgba(0,0,0,0.3)]">
+      <div className="relative z-30 rounded-2xl p-6 w-full max-w-sm bg-background/40 -bg-linear-20 from-background/20 from-30% to-primary/20 shadow-[4px_8px_24px_rgba(0,0,0,0.3)]">
         <div className="text-center">
           <h1 className="text-7xl font-bold text-primary mb-2">404</h1>
           <p className="text-muted-foreground text-sm mb-6">
