@@ -22,13 +22,14 @@ export function TrackerSkeleton() {
         </div>
       </div>
 
+      <div className="flex justify-end">
+        <Skeleton className="h-8 w-full sm:w-44" />
+      </div>
+
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
-        {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((day) => (
-          <div
-            key={day}
-            className="text-center text-xs font-medium text-muted-foreground py-1"
-          >
-            {day}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} className="text-center py-1">
+            <Skeleton className="h-4 w-6 mx-auto" />
           </div>
         ))}
         {Array.from({ length: 42 }).map((_, i) => (

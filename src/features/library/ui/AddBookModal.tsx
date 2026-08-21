@@ -314,7 +314,19 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
 
       <Separator />
 
-      <FieldTags label="ТЕГИ" value={selectedTags} onChange={setSelectedTags} />
+      <FieldTags
+        label="ТЕГИ"
+        value={selectedTags}
+        onChange={setSelectedTags}
+        hint={`Теги помогают сортировать книги по‑своему.
+              Примеры:
+              • источник: «Из ТикТока», «Книжный клуб»
+              • время: «Сентябрь», «На лето»
+              • настроение: «Для души», «Для работы»
+              • жанр: «Фантастика», «Детектив»
+
+              Придумайте свои — ограничений нет!`}
+      />
 
       <Separator />
 

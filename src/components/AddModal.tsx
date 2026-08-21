@@ -122,7 +122,7 @@ export function AddModal({
           noValidate
           className="flex flex-col flex-1 min-h-0"
         >
-          <CardContent className="flex-1 overflow-y-auto space-y-4 py-4">
+          <CardContent className="flex-1 overflow-y-auto space-y-4 py-2">
             {children}
           </CardContent>
           <CardFooter className="flex justify-end py-3">

@@ -9,9 +9,10 @@ interface FieldTagsProps {
   label: string;
   value: string[];
   onChange: (tags: string[]) => void;
+  hint: string;
 }
 
-export function FieldTags({ label, value, onChange }: FieldTagsProps) {
+export function FieldTags({ label, value, onChange, hint }: FieldTagsProps) {
   const [newTag, setNewTag] = useState("");
 
   const handleAddTag = () => {
@@ -33,19 +34,15 @@ export function FieldTags({ label, value, onChange }: FieldTagsProps) {
     }
   };
 
+  const defaultHint = `Гибкий способ группировки`;
+
   return (
     <Field className="gap-0.5">
       <div className="flex items-center gap-2">
         <FieldLabel className="text-xs text-muted-foreground">
           {label}
         </FieldLabel>
-        <Hint
-          text={`Теги — ваш личный способ группировки книг.
-                • источник: «Из ТикТока», «Книжный клуб»
-                • время: «Прочитать в сентябре»
-                • настроение: «Для души», «Для работы»
-                • жанр: «Фантастика», «Детектив»`}
-        />
+        <Hint text={hint || defaultHint} />
       </div>
 
       <FieldContent>
