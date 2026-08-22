@@ -4,18 +4,21 @@ import { useState, useEffect, useCallback } from "react";
 import {
   getSessionsForMonth,
   getDailyGoal,
+  deleteSession,
 } from "@/features/tracker/api/actions";
 import type { ReadingSession } from "@/shared/models/ReadingSession";
 
 import { EmptyState } from "@/components/EmptyState";
-import { Button } from "@/components/ui/button";
 import { LayoutDashboardIcon, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import TrackerHeader from "@/features/tracker/ui/TrackerHeader";
 import TrackerStats from "@/features/tracker/ui/TrackerStats";
 import CalendarGrid from "@/features/tracker/ui/CalendarGrid";
 import { TrackerSkeleton } from "@/features/tracker/ui/TrackerSkeleton";
 import { SessionModal } from "@/features/tracker/ui/SessionModal";
+import { DayDetailsModal } from "@/features/tracker/ui/DayDetailsModal";
+import { showSuccess, showError } from "@/shared/lib/toast";
 
 export default function TrackerPage() {
   const now = new Date();
@@ -31,6 +34,12 @@ export default function TrackerPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [sessionToEdit, setSessionToEdit] = useState<ReadingSession | null>(
     null,
+  );
+
+  const [isDayDetailsOpen, setIsDayDetailsOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
+  const [editingFromDay, setEditingFromDay] = useState<Date | undefined>(
+    undefined,
   );
 
   useEffect(() => {
@@ -82,15 +91,25 @@ export default function TrackerPage() {
     setYear(newYear);
   };
 
-  const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
-    setSessionToEdit(null);
-    setIsSessionModalOpen(true);
-  };
-
   const handleAddSession = () => {
     setSelectedDate(undefined);
     setSessionToEdit(null);
+    setEditingFromDay(undefined);
+    setIsSessionModalOpen(true);
+  };
+
+  const handleEditSession = (session: ReadingSession, dayDate: Date) => {
+    setIsDayDetailsOpen(false);
+    setSessionToEdit(session);
+    setEditingFromDay(dayDate);
+    setIsSessionModalOpen(true);
+  };
+
+  const handleAddSessionForDay = (date: Date) => {
+    setIsDayDetailsOpen(false);
+    setSelectedDate(date);
+    setSessionToEdit(null);
+    setEditingFromDay(date);
     setIsSessionModalOpen(true);
   };
 
@@ -102,6 +121,27 @@ export default function TrackerPage() {
     setIsSessionModalOpen(false);
     setSessionToEdit(null);
     setSelectedDate(undefined);
+
+    if (editingFromDay) {
+      setSelectedDay(editingFromDay);
+      setIsDayDetailsOpen(true);
+      setEditingFromDay(undefined);
+    }
+  };
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDay(date);
+    setIsDayDetailsOpen(true);
+  };
+
+  const handleDeleteSession = async (id: string) => {
+    const result = await deleteSession(id);
+    if (result.success) {
+      showSuccess("Сессия удалена");
+      loadSessions(year, month);
+    } else {
+      showError("Ошибка", result.error);
+    }
   };
 
   return (
@@ -157,6 +197,17 @@ export default function TrackerPage() {
         initialDate={selectedDate}
         sessionToEdit={sessionToEdit}
         onSuccess={handleSessionSaved}
+      />
+
+      <DayDetailsModal
+        isOpen={isDayDetailsOpen}
+        onClose={() => setIsDayDetailsOpen(false)}
+        date={selectedDay!}
+        sessions={sessions}
+        onEditSession={handleEditSession}
+        onAddSession={handleAddSessionForDay}
+        onDeleteSession={handleDeleteSession}
+        onSuccess={() => loadSessions(year, month)}
       />
     </div>
   );
