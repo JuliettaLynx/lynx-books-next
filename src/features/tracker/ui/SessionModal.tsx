@@ -14,7 +14,7 @@ import {
   getUnreadBooks,
 } from "@/features/tracker/api/actions";
 import type { ReadingSession } from "@/shared/models/ReadingSession";
-import { showSuccess, showError } from "@/shared/lib/toast";
+import { showSuccess, showError, showInfo } from "@/shared/lib/toast";
 import { HINTS } from "@/shared/constants/hints";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -57,6 +57,9 @@ export function SessionModal({
   const [booksLoading, setBooksLoading] = useState(false);
   const [noTime, setNoTime] = useState(false);
 
+  const [initialFormData, setInitialFormData] =
+    useState<CreateReadingSessionInput | null>(null);
+
   const startDateFocused = useRef(false);
   const endDateFocused = useRef(false);
 
@@ -82,6 +85,7 @@ export function SessionModal({
     reset,
     setValue,
     watch,
+    getValues,
     formState: { errors, isSubmitting },
   } = methods;
 
@@ -90,6 +94,39 @@ export function SessionModal({
   const endPage = watch("endPage");
   const startDate = watch("startDate");
   const endDate = watch("endDate");
+
+  const hasChanges = useCallback(() => {
+    if (!initialFormData) return false;
+    const currentData = getValues();
+    const compareFields: (keyof CreateReadingSessionInput)[] = [
+      "bookId",
+      "startDate",
+      "endDate",
+      "startPage",
+      "endPage",
+      "finishedBook",
+      "tags",
+      "notes",
+    ];
+    return compareFields.some((field) => {
+      if (field === "startDate" || field === "endDate") {
+        const a = currentData[field]
+          ? new Date(currentData[field]!).getTime()
+          : null;
+        const b = initialFormData[field]
+          ? new Date(initialFormData[field]!).getTime()
+          : null;
+        return a !== b;
+      }
+      if (field === "tags") {
+        return (
+          JSON.stringify(currentData[field]) !==
+          JSON.stringify(initialFormData[field])
+        );
+      }
+      return currentData[field] !== initialFormData[field];
+    });
+  }, [initialFormData, getValues]);
 
   useEffect(() => {
     if (isOpen) {
@@ -109,7 +146,8 @@ export function SessionModal({
       start.setSeconds(0, 0);
       const end = new Date(sessionToEdit.endDate);
       end.setSeconds(0, 0);
-      reset({
+
+      const formData: CreateReadingSessionInput = {
         bookId: sessionToEdit.bookId,
         bookTitle: sessionToEdit.bookTitle,
         colorIndex: sessionToEdit.colorIndex,
@@ -120,7 +158,11 @@ export function SessionModal({
         finishedBook: sessionToEdit.finishedBook,
         tags: sessionToEdit.tags || [],
         notes: sessionToEdit.notes || "",
-      });
+      };
+
+      reset(formData);
+      setInitialFormData(formData);
+
       const hasTime = start.getHours() !== 0 || start.getMinutes() !== 0;
       setNoTime(!hasTime);
     } else {
@@ -132,7 +174,8 @@ export function SessionModal({
       }
       const end = new Date(start);
       end.setMinutes(end.getMinutes() + 30);
-      reset({
+
+      const formData: CreateReadingSessionInput = {
         bookId: "",
         bookTitle: "",
         colorIndex: 0,
@@ -143,7 +186,10 @@ export function SessionModal({
         finishedBook: false,
         tags: [],
         notes: "",
-      });
+      };
+
+      reset(formData);
+      setInitialFormData(formData);
       setNoTime(false);
     }
   }, [isOpen, sessionToEdit, initialDate, reset, isEditMode]);
@@ -201,6 +247,13 @@ export function SessionModal({
   };
 
   const onSubmit: SubmitHandler<CreateReadingSessionInput> = async (data) => {
+    const hasChangesData = hasChanges();
+    if (!hasChangesData && isEditMode) {
+      showInfo("Нет изменений");
+      onClose();
+      return;
+    }
+
     let start = new Date(data.startDate);
     let end = new Date(data.endDate);
     if (noTime) {
@@ -222,7 +275,9 @@ export function SessionModal({
       : await createSession(payload);
 
     if (result.success) {
-      showSuccess(isEditMode ? "Сессия обновлена" : "Сессия создана");
+      if (!isEditMode || hasChangesData) {
+        showSuccess(isEditMode ? "Сессия обновлена" : "Сессия создана");
+      }
       onSuccess();
       onClose();
     } else {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   type AddBookInput,
   AddBookSchema,
@@ -19,7 +20,7 @@ import {
 } from "@/features/library/config/filterOptions";
 import type { LibraryBook } from "@/shared/models/Book";
 import { compressImage } from "@/shared/lib/compressImage";
-import { showSuccess, showError } from "@/shared/lib/toast";
+import { showSuccess, showError, showInfo } from "@/shared/lib/toast";
 
 import { FieldInput } from "@/components/FieldInput";
 import { FieldTags } from "@/components/FieldTags";
@@ -50,6 +51,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
     control,
     watch,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<AddBookInput>({
     resolver: zodResolver(AddBookSchema),
@@ -61,7 +63,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       seriesNumber: undefined,
       isbn: "",
       annotation: "",
-      pages: undefined,
+      pages: 1,
       cover: "",
       tags: [],
       readingStatus: "не прочитано",
@@ -83,8 +85,46 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   const [quotePage, setQuotePage] = useState<number | undefined>(undefined);
   const [isInSeries, setIsInSeries] = useState(false);
 
+  const [initialFormData, setInitialFormData] = useState<AddBookInput | null>(
+    null,
+  );
+
   const currentStatus = watch("readingStatus");
   const currentRating = watch("rating");
+
+  const hasChanges = useCallback(() => {
+    if (!initialFormData || !isEditMode) return true;
+    const currentData = getValues();
+    const fieldsToCompare: (keyof AddBookInput)[] = [
+      "title",
+      "author",
+      "publisher",
+      "seriesName",
+      "seriesNumber",
+      "isbn",
+      "annotation",
+      "pages",
+      "readingStatus",
+      "format",
+      "rating",
+      "review",
+    ];
+
+    const mainFieldsChanged = fieldsToCompare.some((field) => {
+      return currentData[field] !== initialFormData[field];
+    });
+
+    const tagsChanged =
+      JSON.stringify(currentData.tags) !== JSON.stringify(initialFormData.tags);
+
+    const quotesChanged =
+      JSON.stringify(currentData.quotes) !==
+      JSON.stringify(initialFormData.quotes);
+
+    const coverChanged = coverFile !== null;
+
+    return mainFieldsChanged || tagsChanged || quotesChanged || coverChanged;
+  }, [initialFormData, getValues, coverFile, isEditMode]);
 
   useEffect(() => {
     setValue("isInSeries", isInSeries);
@@ -95,20 +135,19 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
       setSelectedTags(editBook.tags ?? []);
       setCoverPreview(editBook.cover ?? null);
       setCoverFile(null);
-      setQuotes(
-        editBook.quotes.map((q) => ({
-          id: q._id ?? Date.now().toString(),
-          text: q.text,
-          page: q.page,
-        })),
-      );
+      const quotesData = editBook.quotes.map((q) => ({
+        id: q._id ?? Date.now().toString(),
+        text: q.text,
+        page: q.page,
+      }));
+      setQuotes(quotesData);
       setQuoteText("");
       setQuotePage(undefined);
       setEditingId(null);
       setIsInSeries(!!editBook.seriesName);
       setValue("isInSeries", !!editBook.seriesName);
 
-      reset({
+      const formData: AddBookInput = {
         title: editBook.title,
         author: editBook.author,
         publisher: editBook.publisher ?? "",
@@ -116,17 +155,21 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
         seriesNumber: editBook.seriesNumber ?? undefined,
         isbn: editBook.isbn ?? "",
         annotation: editBook.annotation ?? "",
-        pages: editBook.pages,
+        pages: editBook.pages ?? 1,
         cover: editBook.cover ?? "",
         tags: editBook.tags ?? [],
         readingStatus: editBook.readingStatus,
         format: editBook.format,
         rating: editBook.rating ?? undefined,
         review: editBook.review ?? "",
-        quotes: [],
-      });
+        quotes: quotesData.map(({ id, ...rest }) => rest),
+        isInSeries: !!editBook.seriesName,
+      };
+
+      reset(formData);
+      setInitialFormData(formData);
     } else if (!isEditMode && isOpen) {
-      reset({
+      const formData: AddBookInput = {
         title: "",
         author: "",
         publisher: "",
@@ -134,7 +177,7 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
         seriesNumber: undefined,
         isbn: "",
         annotation: "",
-        pages: undefined,
+        pages: 1,
         cover: "",
         tags: [],
         readingStatus: "не прочитано",
@@ -142,7 +185,11 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
         rating: undefined,
         review: "",
         quotes: [],
-      });
+        isInSeries: false,
+      };
+
+      reset(formData);
+      setInitialFormData(null);
       setSelectedTags([]);
       setCoverPreview(null);
       setCoverFile(null);
@@ -200,6 +247,12 @@ export function AddBookModal({ isOpen, onClose, editBook }: AddBookModalProps) {
   };
 
   const onSubmit = async (data: AddBookInput) => {
+    if (isEditMode && !hasChanges()) {
+      showInfo("Нет изменений");
+      onClose();
+      return;
+    }
+
     let coverUrl = data.cover;
 
     if (coverFile) {
