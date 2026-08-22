@@ -255,3 +255,36 @@ export async function deleteSession(id: string) {
     return { success: false, error: "Ошибка при удалении сессии" };
   }
 }
+
+export async function getUnreadBooks() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return [];
+
+  const userId = (session.user as any).id ?? session.user.email;
+  if (!userId) return [];
+
+  try {
+    const client = await clientPromise;
+    const db = client.db(dbName);
+    const books = db.collection("books");
+
+    const docs = await books
+      .find({
+        userId,
+        readingStatus: { $in: ["не прочитано", "брошено"] },
+      })
+      .project({ _id: 1, title: 1, author: 1, cover: 1, publisher: 1 })
+      .toArray();
+
+    return docs.map((doc) => ({
+      id: doc._id.toString(),
+      title: doc.title,
+      author: doc.author,
+      cover: doc.cover || null,
+      publisher: doc.publisher || null,
+    }));
+  } catch (error) {
+    console.error("getUnreadBooks error:", error);
+    return [];
+  }
+}

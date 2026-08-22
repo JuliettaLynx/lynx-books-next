@@ -12,19 +12,15 @@ const SessionFieldsSchema = z.object({
   startDate: z.date("Дата начала обязательна"),
   endDate: z.date("Дата окончания обязательна"),
   startPage: z
-    .number()
+    .number("Обязательно")
     .int()
-    .positive("Начальная страница должна быть положительным числом")
-    .optional()
-    .nullable(),
+    .positive("Начальная страница должна быть положительным числом"),
   endPage: z
-    .number()
+    .number("Обязательно")
     .int()
-    .positive("Конечная страница должна быть положительным числом")
-    .optional()
-    .nullable(),
-  finishedBook: z.boolean().default(false),
-  tags: z.array(z.string()).default([]),
+    .positive("Конечная страница должна быть положительным числом"),
+  finishedBook: z.boolean(),
+  tags: z.array(z.string()),
   notes: z.string().optional().nullable(),
 });
 
@@ -37,20 +33,12 @@ export const createReadingSessionSchema = SessionFieldsSchema.superRefine(
         path: ["startDate"],
       });
     }
-
-    if (
-      data.startPage !== undefined &&
-      data.startPage !== null &&
-      data.endPage !== undefined &&
-      data.endPage !== null
-    ) {
-      if (data.startPage > data.endPage) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Начальная страница не может быть больше конечной",
-          path: ["startPage"],
-        });
-      }
+    if (data.startPage > data.endPage) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Начальная страница не может быть больше конечной",
+        path: ["startPage"],
+      });
     }
   },
 );
@@ -64,7 +52,6 @@ export const updateReadingSessionSchema =
         path: ["startDate"],
       });
     }
-
     if (
       data.startPage != null &&
       data.endPage != null &&

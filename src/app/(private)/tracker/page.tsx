@@ -8,12 +8,14 @@ import {
 import type { ReadingSession } from "@/shared/models/ReadingSession";
 
 import { EmptyState } from "@/components/EmptyState";
-import { LayoutDashboardIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboardIcon, Plus } from "lucide-react";
 
 import TrackerHeader from "@/features/tracker/ui/TrackerHeader";
 import TrackerStats from "@/features/tracker/ui/TrackerStats";
 import CalendarGrid from "@/features/tracker/ui/CalendarGrid";
 import { TrackerSkeleton } from "@/features/tracker/ui/TrackerSkeleton";
+import { SessionModal } from "@/features/tracker/ui/SessionModal";
 
 export default function TrackerPage() {
   const now = new Date();
@@ -22,9 +24,14 @@ export default function TrackerPage() {
   const [sessions, setSessions] = useState<ReadingSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [dailyGoal, setDailyGoal] = useState<number>(50);
   const [goalLoading, setGoalLoading] = useState(true);
+
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [sessionToEdit, setSessionToEdit] = useState<ReadingSession | null>(
+    null,
+  );
 
   useEffect(() => {
     getDailyGoal()
@@ -76,13 +83,30 @@ export default function TrackerPage() {
   };
 
   const handleDayClick = (date: Date) => {
-    console.log("Clicked day:", date);
+    setSelectedDate(date);
+    setSessionToEdit(null);
+    setIsSessionModalOpen(true);
+  };
+
+  const handleAddSession = () => {
+    setSelectedDate(undefined);
+    setSessionToEdit(null);
+    setIsSessionModalOpen(true);
+  };
+
+  const handleSessionSaved = () => {
+    loadSessions(year, month);
+  };
+
+  const handleModalClose = () => {
+    setIsSessionModalOpen(false);
+    setSessionToEdit(null);
+    setSelectedDate(undefined);
   };
 
   return (
     <div className="p-4 md:p-6 space-y-4">
       <h1 className="text-3xl font-bold">Трекер</h1>
-
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <div className="space-y-4">
           {loading || goalLoading ? (
@@ -99,6 +123,14 @@ export default function TrackerPage() {
                 onYearChange={handleYearChange}
               />
               <TrackerStats sessions={sessions} year={year} month={month} />
+
+              <div className="flex justify-end">
+                <Button onClick={handleAddSession} className="w-full sm:w-auto">
+                  <Plus className="size-4 mr-2" />
+                  Добавить сессию
+                </Button>
+              </div>
+
               <CalendarGrid
                 year={year}
                 month={month}
@@ -117,6 +149,15 @@ export default function TrackerPage() {
           className="w-full min-h-50"
         />
       </div>
+
+      <SessionModal
+        isOpen={isSessionModalOpen}
+        onClose={handleModalClose}
+        sessions={sessions}
+        initialDate={selectedDate}
+        sessionToEdit={sessionToEdit}
+        onSuccess={handleSessionSaved}
+      />
     </div>
   );
 }
