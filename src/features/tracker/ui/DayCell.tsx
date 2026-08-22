@@ -54,8 +54,8 @@ export function DayCell({
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full">
         <span className="text-sm font-medium leading-none">{day}</span>
         {hasSessions && (
-          <span className="text-[10px] text-secondary-foreground mt-0.5">
-            {totalPages} стр.
+          <span className="text-[12px] text-secondary-foreground mt-0.5">
+            {totalPages} с.
           </span>
         )}
       </div>

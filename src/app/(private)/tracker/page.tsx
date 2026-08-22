@@ -162,7 +162,7 @@ export default function TrackerPage() {
                 onNextMonth={handleNextMonth}
                 onYearChange={handleYearChange}
               />
-              <TrackerStats sessions={sessions} year={year} month={month} />
+              <TrackerStats sessions={sessions} />
 
               <div className="flex justify-end">
                 <Button onClick={handleAddSession} className="w-full sm:w-auto">

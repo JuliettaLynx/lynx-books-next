@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { format } from "date-fns";
 import { DayCell } from "./DayCell";
 import type { ReadingSession } from "@/shared/models/ReadingSession";
 
@@ -22,7 +23,7 @@ export default function CalendarGrid({
   const sessionsByDate = useMemo(() => {
     const map = new Map<string, ReadingSession[]>();
     sessions.forEach((s) => {
-      const key = s.startDate.toISOString().slice(0, 10);
+      const key = format(new Date(s.startDate), "yyyy-MM-dd");
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(s);
     });
@@ -72,7 +73,7 @@ export default function CalendarGrid({
       ))}
 
       {days.map((date, index) => {
-        const dateKey = date.toISOString().slice(0, 10);
+        const dateKey = format(date, "yyyy-MM-dd");
         const daySessions = sessionsByDate.get(dateKey) || [];
         const isCurrentMonth = date.getMonth() === month;
 
